@@ -1,5 +1,11 @@
 # sensing-dev-installer
 
+Components:
+* ion-kit
+* Aravis
+* WinUSB installer
+* OpenCV
+
 ## How to build
 
 ```
