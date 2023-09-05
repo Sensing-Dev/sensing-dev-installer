@@ -39,7 +39,7 @@ if (-not $currentPath.Contains($newPath)) {
     $currentPath += ";$newPath"
     [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
 }
-Write-Verbose "Updated PATH: $currentPath"
+Write-Output "Updated PATH: $currentPath"
 
 # Update PYTHONPATH if the new path is not already in it
 if (-not $currentPythonPath -or (-not $currentPythonPath.Contains($newPythonPath))) {
@@ -50,23 +50,26 @@ if (-not $currentPythonPath -or (-not $currentPythonPath.Contains($newPythonPath
     }
     [Environment]::SetEnvironmentVariable("PYTHONPATH", $currentPythonPath, "User")
 }
-Write-Verbose "Updated PYTHONPATH: $currentPythonPath"
+Write-Output "Updated PYTHONPATH: $currentPythonPath"
 
 
 # Update SENSING_DEV_ROOT if the new path is not already in it
 [Environment]::SetEnvironmentVariable("SENSING_DEV_ROOT", $installPath, "User")
-Write-Verbose "Updated SENSING_DEV_ROOT: $installPath"
+Write-Output "Updated SENSING_DEV_ROOT: $installPath"
 
 [Environment]::SetEnvironmentVariable("GST_PLUGIN_PATH", $installPath, "User")
-Write-Verbose "Updated GST_PLUGIN_PATH: $installPath"
+Write-Output "Updated GST_PLUGIN_PATH: $installPath"
 
 
 # Run Winusb installer
-
-Write-Verbose "Start winUsb installer"
+Write-Output ""
+Write-Output "Start winUsb installer"
+Write-Output "  This may take a few minute..."
 $TempDir = "$installPath/tools/winusb_installer/temp"
 	
-New-item -Path "$TempDir" -ItemType Directory
+if (-not (Test-Path -Path $TempDir)){
+    New-item -Path "$TempDir" -ItemType Directory
+}
 $winUSBOptions = @{
     FilePath               = "$installPath/tools/winusb_installer/winusb_installer.exe"
     ArgumentList           = "054c"
@@ -75,30 +78,31 @@ $winUSBOptions = @{
     Verb                   = "RunAs"  # This attempts to run the process as an administrator
 }
 Start-Process @winUSBOptions
-Write-Verbose "End winUsb installer"
+Write-Output "Done winUsb installer"
+Write-Output ""
 
 # Run Driver installer
 
-Write-Verbose "Start Driver installer"
-
-$infPath = "$TempDir/target.inf"
+Write-Output "Start Driver installer"
+$infPath = "$TempDir/target_device.inf"
 if (-not (Test-Path -Path $infPath -PathType Leaf) ){
     Write-Error "$infPath does not exist."
 }
 else{
     $pnputilOptions = @{
-        FilePath = "PUNPUTIL"
-        ArgumentList           = "-i -a $infPath"
+        FilePath = "$env:SystemRoot\System32\pnputil.exe"
+        ArgumentList           = "/add-driver $infPath /install"
         WorkingDirectory       = "$TempDir"
         Wait                   = $true
         Verb                   = "RunAs"  # This attempts to run the process as an administrator
     }
     Start-Process @pnputilOptions
 }
+Write-Output "Done Driver installer"
+Write-Output ""
 
 # delete temp files
-
-Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"Remove-Item -Path '$TempDir' -Recurse -Force -Confirm:`$false`""
+Remove-Item -Path $TempDir -Force -Recurse
 
 Write-Verbose "End Driver installer"
 
