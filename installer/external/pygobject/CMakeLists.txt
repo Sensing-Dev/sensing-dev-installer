@@ -6,7 +6,7 @@ set(PYGOBJECT_VERSION 3.42.2)
 # Set URLs for Windows and Linux
 	#https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
 set(PYGOBJECT_WIN_URL "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip")
-set(PYGOBJECT_WIN_URL_HASH "eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037")
+set(PYGOBJECT_WIN_URL_HASH "F4F2F06E65CFEAA3EE9359E73D09B0D94F13525F601D3A090746A376D92C7837")
 
 # Determine the operating system
 if(WIN32)
