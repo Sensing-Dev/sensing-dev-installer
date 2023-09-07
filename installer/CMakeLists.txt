@@ -80,7 +80,7 @@ endif()
 
 # install(CODE "execute_process(COMMAND powershell -ExecutionPolicy Bypass -File \${CMAKE_INSTALL_PREFIX}/tools/Env.ps1 -installPath \${CMAKE_INSTALL_PREFIX})")
 file(ARCHIVE_CREATE
-    OUTPUT "test-win64"
+    OUTPUT "${PROJECT_NAME}-${SENSING_DEV_INSTALLER_VERSION_MAJOR}.${SENSING_DEV_INSTALLER_VERSION_MINOR}.${SENSING_DEV_INSTALLER_VERSION_PATCH}-win64"
     PATHS .
     FORMAT "zip")
 
