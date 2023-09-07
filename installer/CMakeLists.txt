@@ -80,7 +80,7 @@ endif()
 
 # install(CODE "execute_process(COMMAND powershell -ExecutionPolicy Bypass -File \${CMAKE_INSTALL_PREFIX}/tools/Env.ps1 -installPath \${CMAKE_INSTALL_PREFIX})")
 file(ARCHIVE_CREATE
-    OUTPUT "${CMAKE_PROJECT_NAME}-win64"
+    OUTPUT "test-win64"
     PATHS 
         "${CMAKE_INSTALL_PREFIX}"
     FORMAT "zip")
