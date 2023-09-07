@@ -6,7 +6,7 @@ set(ARAVIS_VERSION 0.8.25)
 # Set URLs for Windows and Linux
 	#https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip
 set(ARAVIS_WIN_URL "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip")
-set(ARAVIS_WIN_URL_HASH "D9633F91EDE3469AE00722CC2EEF506B6B6289AFC498FAE588B8898319E383B2")
+set(ARAVIS_WIN_URL_HASH "f18462e10006c05779854ebf59f97906762d70b2fc90225669ec7e140969adb3")
 
 # Determine the operating system
 if(WIN32)
@@ -40,7 +40,7 @@ ExternalProject_Add(
 )
 
 set(ARAVIS_DEP_DIR "${CMAKE_BINARY_DIR}/external/aravis_dependencies/src/aravis_dep")
-set(ARAVIS_DEP_WIN_URL_HASH "379DF5AA0EF95E2FAECE6E3688681CD9BB57DBD1B9701D3320174E0846EA7621")
+set(ARAVIS_DEP_WIN_URL_HASH "c0b26fc0c0d2fde51f13107b450c66808ee88d15c2adb0a1f6d4b473f282c3a9")
 
 
 ExternalProject_Add(
