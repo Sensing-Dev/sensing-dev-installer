@@ -44,7 +44,6 @@ jobs:
         working-directory: installer/build
         run: | 
           cmake --build . --config Release
-          ls
 
       - name: Package with CPack WIX
         working-directory: installer/build
@@ -56,6 +55,7 @@ jobs:
           name: sensing-dev-installer
           path: |
             installer/build/*.msi
+            installer/build/*.zip
   
   test:
     needs: build
