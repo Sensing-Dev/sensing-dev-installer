@@ -81,8 +81,7 @@ endif()
 # install(CODE "execute_process(COMMAND powershell -ExecutionPolicy Bypass -File \${CMAKE_INSTALL_PREFIX}/tools/Env.ps1 -installPath \${CMAKE_INSTALL_PREFIX})")
 file(ARCHIVE_CREATE
     OUTPUT "test-win64"
-    PATHS 
-        "${CMAKE_INSTALL_PREFIX}"
+    PATHS .
     FORMAT "zip")
 
 include(cmake/CPackConfig.cmake)
