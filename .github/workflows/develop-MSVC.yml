@@ -48,13 +48,18 @@ jobs:
         working-directory: installer/build
         run: cpack -G "WIX"
 
+      - name: Package with CPack WIX
+        working-directory: installer/build
+        run: cpack -G "ZIP"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: sensing-dev-installer
           path: |
             installer/build/*.msi
-  
+            installer/build/*.zip
+            
   test:
     needs: build
     runs-on: windows-latest
