@@ -48,7 +48,7 @@ jobs:
         working-directory: installer/build
         run: cpack -G "WIX"
 
-      - name: Package with CPack WIX
+      - name: Create package zip
         working-directory: installer/build
         run: cpack -G "ZIP"
 
