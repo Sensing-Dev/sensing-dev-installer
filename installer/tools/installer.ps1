@@ -1,7 +1,7 @@
 param(
     [string]$version="v23.08.02-test1",
-    [string]$msiUrl,
-    [string]$installPath = "$env:LOCALAPPDATA\sensing-dev-installer",
+    [string]$msiUrl ,
+    [string]$installPath = "$env:UserProfile\AppData\local\Sensing-Dev",
     [string]$relativeScriptPath = "tools\Env.ps1"
 )
 # Check if the MSI URL and Install Path are provided
@@ -53,4 +53,6 @@ if (Test-Path -Path $ps1ScriptPath -PathType Leaf) {
 }
 
 # Cleanup
-# Remove-Item -Path $tempMsiPath -Force
+if (Test-Path -Path $tempMsiPath ){
+    Remove-Item -Path $tempMsiPath -Force
+}
