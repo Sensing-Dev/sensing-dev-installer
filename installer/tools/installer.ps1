@@ -9,34 +9,43 @@ if ( -not $installPath) {
     Write-Error "Please provide installation path!"
     exit
 }
+Write-Output "installPath = $installPath"
+
 # Check if the MSI URL and Install Path are provided
 if (-not $version -and -not $msiUrl) {
     Write-Error "Please provide both MSI URL or version!"
     exit
 }
+$installerName = "sensing-dev-installer"
+
 if (-not $msiUrl ) {
 
-    if ($version.StartsWith("v")) {
-        $version = $version.Substring(1)
-    }
-    # if the tag has "-"
-    $majorVersion = $version -split "-"
-    $majorVersion = $majorVersion[0]
-    $msiUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/v${version}/sensing-dev-installer-${majorVersion}-win64.msi"
+   if ($version -match 'v(\d+\.\d+\.\d+)-\w+') {
+        $versionNum = $matches[1]
+        Write-Output $versionNum
+   }
+    #https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/v23.08.0-beta2/sensing-dev-installer-23.08.0-win64.msi
+    $msiUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/sensing-dev-installer-${versionNum}-win64.msi"
+}
+# Download MSI to a temp location
+$tempMsiPath = "$env:TEMP\$installerName.msi"
+# Invoke-WebRequest -Uri $msiUrl -OutFile $tempMsiPath -Verbose
+
+# Install MSI to the specified path
+# Note: This assumes the MSI accepts TARGETDIR as an argument for the installation directory. Some MSIs might not.
+Start-Process -Wait -FilePath "msiexec.exe" -ArgumentList "/i `"$tempMsiPath`" TARGETDIR=`"$installPath`" INSTALL_ROOT=`"$installerName`" /qb /l*v $tempMsiPath\${installerName}_install.log" -Verb RunAs
+# Start-Process -Wait -FilePath "msiexec.exe" -ArgumentList "/i `"$tempMsiPath`" TARGETDIR=`"$installPath`" /qb /l*v install.log" -Verb RunAs
+
+# Check if the process started and finished successfully
+if ($?) {
+    Write-Host "The process msiexec.exe ran successfully."
+} else {
+    Write-Host "The process encountered an error."
 }
 
-# Download MSI to a temp location
-$tempMsiPath = "$env:TEMP\sensing-dev-installer.msi"
-Invoke-WebRequest -Uri $msiUrl -OutFile $tempMsiPath -Verbose
-
-# Install MSI to specified path
-# Note: This assumes the MSI accepts TARGETDIR as an argument for installation directory. Some MSIs might not.
-
-Start-Process -Wait -FilePath "msiexec.exe" -ArgumentList "/i `"$tempMsiPath`" INSTALL_ROOT=`"$installPath`" /qn"
-
-
-# Run .ps1 file from the installed package
+# Run the .ps1 file from the installed package
 $ps1ScriptPath = Join-Path -Path $installPath -ChildPath $relativeScriptPath
+Write-Output "ps1ScriptPath = $ps1ScriptPath"
 if (Test-Path -Path $ps1ScriptPath -PathType Leaf) {
     & $ps1ScriptPath
 } else {

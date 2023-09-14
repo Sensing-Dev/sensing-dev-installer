@@ -3,8 +3,8 @@
 
 ### Added
 - Initial project setup.
-- Added CMake setup for the Aravis, Pygobject, ion-kit and Opencv 
-- Added post installation scripts
+- Added CMake setup for the Aravis, Pygobject, ion-kit, and Opencv 
+- Added post-installation scripts
 
 ### Changed
 - Changed Aravis version to 0.8.25.

@@ -50,13 +50,24 @@ jobs:
         working-directory: installer/build
         run: cpack -G "WIX"
 
+      - name: Upload artifacts MSI
+        uses: actions/upload-artifact@v2
+        with:
+          name: sensing-dev-installer-msi
+          path: |
+            installer/build/*.msi
+
+      - name: Create package zip
+        working-directory: installer/build
+        run: cpack -G "ZIP"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: sensing-dev-installer
+          name: sensing-dev-installer-zip
           path: |
-            installer/build/*.msi
-  
+            installer/build/*.zip
+            
   test:
     needs: build
     runs-on: windows-latest
