@@ -22,8 +22,10 @@ jobs:
       - name: Install WiX Toolset
         run: choco install wixtoolset -y
 
-      - name: Checkout repository
+      - name: Checkout repository and submodules
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - name: Create and enter build directory
         run: |
