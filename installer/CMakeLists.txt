@@ -65,8 +65,8 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include  FILES_MATCHI
 install(FILES ${CMAKE_BINARY_DIR}/Version.h DESTINATION include)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/tools/ DESTINATION tools)
 
-# Package Python module gendc_separator to our software package
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/GenDC DESTINATION lib/site-packages)
+# Package Python module gendc_separator to our software package (installer\external\GenDC\gendc_separator)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/GenDC/gendc_separator DESTINATION lib/site-packages)
 
 # For MSVC generator
 if(MSVC)    
