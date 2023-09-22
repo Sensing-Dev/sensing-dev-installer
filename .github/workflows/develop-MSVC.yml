@@ -49,7 +49,7 @@ jobs:
       working-directory: installer/aravis
       run: |
         conan profile detect
-        conan install .. -b missing -pr .\conan_profile -of .
+        conan install .. -b missing -pr ..\conan_profile -of .
     
     - name: Create ZIP from Conan installed files
       working-directory: installer/aravis
