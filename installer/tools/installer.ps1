@@ -1,9 +1,39 @@
+<#
+.SYNOPSIS
+Script for downloading and installing Sensing SDK-installer
+
+.DESCRIPTION
+Downloads and install zip or msi of given version or latest version
+
+.PARAMETER version
+Specifies the version. The default is 'latest'.
+
+.PARAMETER user
+Specifies the user name. Use this to install installer at users's LOCALAPPDATA
+
+.PARAMETER Url
+Installer URL to be used by the script or function.
+
+.PARAMETER installPath
+Specifies the installation path. The default is the sensing-dev-installer directory in the user's LOCALAPPDATA.
+
+.EXAMPLE
+PS C:\> .\installer.ps1 -version 'v24.09.03' -user 'Admin' -Url 'http://example.com'
+
+This example demonstrates how to run the script with custom version, user, and Url values.
+
+.NOTES
+Any additional notes related to the script or function.
+
+.LINK
+http://example.com/documentation-link
+#>
+
 param(
-    [string]$version="v23.08.02-test1",
+    [string]$version,
     [string]$user,
     [string]$Url,
-    [string]$installPath = "$env:LOCALAPPDATA\sensing-dev-installer",
-    [string]$relativeScriptPath = "tools\Env.ps1"
+    [string]$installPath = "$env:LOCALAPPDATA\sensing-dev-installer"
 )
 # Check if the MSI URL and Install Path are provided
 if ( -not $installPath) {
@@ -29,12 +59,16 @@ $installerName = "sensing-dev-installer"
 $installPath = "$installPath\$installerName"
 
 if (-not $Url ) {
-
+    if (-not $version ) {
+        $repoUrl = "https://api.github.com/repos/Sensing-Dev/sensing-dev-installer/releases/latest"
+        $response = Invoke-RestMethod -Uri $repoUrl
+        $version = $response.tag_name
+        $version
+    }
    if ($version -match 'v(\d+\.\d+\.\d+)-\w+') {
         $versionNum = $matches[1]
         Write-Output $versionNum
    }
-    #https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/v23.08.0-beta5/sensing-dev-installer-23.08.0-win64.zip
     $zipUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/sensing-dev-installer-${versionNum}-win64.zip"
     $msiUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/sensing-dev-installer-${versionNum}-win64.msi"
 
@@ -83,7 +117,7 @@ if ($Url.EndsWith("msi")) {
 }
 
 
-
+$relativeScriptPath = "tools\Env.ps1"
 # Run the .ps1 file from the installed package
 $ps1ScriptPath = Join-Path -Path $installPath -ChildPath $relativeScriptPath
 Write-Verbose "ps1ScriptPath = $ps1ScriptPath"
