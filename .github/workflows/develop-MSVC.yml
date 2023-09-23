@@ -48,6 +48,8 @@ jobs:
     - name: Get dependencies using Conan
       working-directory: installer/aravis
       run: |
+        conan profile detect
+        conan profile show
         conan install .. -b missing -pr ..\conan_profile -of .
     
     - name: Create ZIP from Conan installed files
