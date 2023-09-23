@@ -92,6 +92,7 @@ jobs:
 
 
   build:
+    needs: aravis
     runs-on: windows-latest
     
     steps:     
