@@ -66,7 +66,7 @@ jobs:
     - name: Build Aravis using meson 
       working-directory: installer/aravis
       run: |
-        tree
+        tree build\generators /F
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
         echo "::group::configure"
