@@ -68,12 +68,6 @@ class SensingDevInstallerConan(ConanFile):
     def build(self):
         self.import_dependencies()
 
-    def package_info(self):
-    # Setting values
-    #tools.env.virtualenv:powershell=True
-        self.conf_info.define("tools.build:verbosity", "verbose")
-        self.conf_info.define("tools.env.virtualenv:powershell", True)
-
     def package(self):
         copy(self, "LICENSE.md",
              dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
