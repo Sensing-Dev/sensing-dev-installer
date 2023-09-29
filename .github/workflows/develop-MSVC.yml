@@ -68,7 +68,8 @@ jobs:
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
         echo "::group::configure"
-        meson setup --prefix ${{ github.workspace }}\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\build\generators -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build        echo "::endgroup::"
+        meson setup --prefix ${{ github.workspace }}\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\build\generators -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
+        echo "::endgroup::"
         echo "::group::compile"
         meson compile -C .\build -v
         echo "::endgroup::"
