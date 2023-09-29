@@ -45,6 +45,9 @@ jobs:
     - name: Disable Perl (remove from PATH)
       run: echo "C:\Strawberry\perl" | Out-Null
 
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
     - name: Get dependencies using Conan
       working-directory: installer/aravis
       run: |
