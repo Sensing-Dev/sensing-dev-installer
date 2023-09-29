@@ -65,8 +65,10 @@ jobs:
     - name: Build Aravis using meson 
       working-directory: installer/aravis
       run: |
+        echo "::group::virtualenv"
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
+        echo "::endgroup::"
         echo "::group::configure"
         meson setup --prefix ${{ github.workspace }}\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\build\generators -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
         echo "::endgroup::"
