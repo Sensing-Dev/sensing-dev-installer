@@ -44,8 +44,9 @@ jobs:
 
     - name: Disable Perl (remove from PATH)
       run: |
-       tree C:\Strawberry /F
-       echo "C:\Strawberry\perl" | Out-Null
+       rm -r C:\Strawberry\perl
+      #  tree C:\Strawberry /F
+      #  echo "C:\Strawberry\perl" | Out-Null
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
@@ -84,6 +85,7 @@ jobs:
         meson install -C .\build
         echo "::endgroup::"
 
+  
     - name: Create ZIP from installed files
       working-directory: installer/aravis
       run: |
