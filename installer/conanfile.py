@@ -60,7 +60,7 @@ class SensingDevInstallerConan(ConanFile):
         self.requires("libusb/1.0.26")
         self.requires("libffi/3.4.4")  
         self.requires("libiconv/1.17")  
-        self.requires("libgettext/0.21")  
+        #self.requires("libgettext/0.21")  
 
     def generate(self):
         self.import_dependencies()
