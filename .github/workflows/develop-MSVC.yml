@@ -44,9 +44,8 @@ jobs:
 
     - name: Disable Perl (remove from PATH)
       run: |
-       rm -r C:\Strawberry\perl
+       Remove-Item -Path "C:\Strawberry\perl" -Recurse
       #  tree C:\Strawberry /F
-      #  echo "C:\Strawberry\perl" | Out-Null
 
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1

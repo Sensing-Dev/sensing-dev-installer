@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 class SensingDevInstallerConan(ConanFile): 
@@ -100,7 +100,7 @@ class SensingDevInstallerConan(ConanFile):
                 if not os.path.exists(dependency_folder):
                     os.makedirs(dependency_folder)
             else:
-                self.output.error("SENSING_DEV_INSTALL is not set.")    
+                self.output.error("dependency_folder is not set.")    
 
             include_install_dir = os.path.join(dependency_folder,"include")
             lib_install_dir = os.path.join(dependency_folder,"lib")
