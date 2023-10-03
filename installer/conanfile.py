@@ -48,9 +48,7 @@ class SensingDevInstallerConan(ConanFile):
         self.tool_requires("meson/1.0.0")  
         self.tool_requires("winflexbison/2.5.24")  
         self.tool_requires("m4/1.4.19")  
-
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("pkgconf/1.9.3")
 
     def requirements(self):
         self.requires("glib/2.76.3")
