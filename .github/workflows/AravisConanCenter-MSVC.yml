@@ -46,7 +46,7 @@ jobs:
     - name: Build aravis using conan
       working-directory: installer  
       run: |
-        conan install .\conanfile_aravis.py -b missing -pr .\conan_profile -of .
+        conan install conanfile_aravis.py -b missing -pr .\conan_profile -of .
 
     - name: Create ZIP from Conan installed files
       working-directory: installer
