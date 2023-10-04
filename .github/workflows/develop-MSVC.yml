@@ -71,6 +71,7 @@ jobs:
       working-directory: installer/aravis
       run: |
         echo "::group::virtualenv"
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
         echo "::endgroup::"
