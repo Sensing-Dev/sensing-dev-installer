@@ -71,7 +71,9 @@ jobs:
       working-directory: installer/aravis
       run: |
         echo "::group::virtualenv"
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        Start-Process -FilePath cmd.exe `
+                -ArgumentList "/c call `
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"``
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
         echo "::endgroup::"
@@ -126,17 +128,22 @@ jobs:
       run: |
         conan profile detect
         conan create . --version="${{ matrix.aravis_version }}" -b missing -o gst_plugin=False -o introspection=False -o usb=True -o gv_n_buffers=1 -o viewer=False -o shared=True
+    
+    - name: Build aravis using conan
+      working-directory: installer  
+      run: |
+        conan install . -b missing -pr .\conan_profile -of .
 
     - name: Create ZIP from Conan installed files
-      working-directory: installer/external/aravis
+      working-directory: installer/
       run: |
         Compress-Archive -Path build\dependencies\* -DestinationPath aravis${{ matrix.aravis_version }}.zip
 
-    - name: Upload Aravis-dependencies ZIP as artifact
+    - name: Upload Aravis ZIP as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: Aravis-dependencies_zip
-        path:  installer/external/aravis/aravis${{ matrix.aravis_version }}.zip
+        name: Aravis_zip
+        path:  installer/aravis${{ matrix.aravis_version }}.zip
 
 
 
