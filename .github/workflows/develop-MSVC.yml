@@ -99,51 +99,9 @@ jobs:
         name:  aravis_${{ matrix.aravis_version }}_zip
         path:  installer/aravis/aravis_${{ matrix.aravis_version }}.zip
 
-  aravis_conan:
-    runs-on: windows-2019
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - aravis_version: "0.8.25"
 
-    steps:     
-
-    - name: Set up Python 
-      uses: actions/setup-python@v2
-      with:
-          python-version: "3.11.4"
-          
-    - name: Install Conan via pip
-      run: python -m pip install conan
-
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
-
-    - name: Build aravis using conan
-      working-directory: installer/external/aravis  
-      run: |
-        conan profile detect
-        conan create . --version="${{ matrix.aravis_version }}" -b missing -o gst_plugin=False -o introspection=False -o usb=True -o gv_n_buffers=1 -o viewer=False -o shared=True
-    
-    - name: Build aravis using conan
-      working-directory: installer  
-      run: |
-        conan install . -b missing -pr .\conan_profile -of .
-
-    - name: Create ZIP from Conan installed files
-      working-directory: installer/
-      run: |
-        Compress-Archive -Path build\dependencies\* -DestinationPath aravis${{ matrix.aravis_version }}.zip
-
-    - name: Upload Aravis ZIP as artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: Aravis_zip
-        path:  installer/aravis${{ matrix.aravis_version }}.zip
+  
 
 
 
