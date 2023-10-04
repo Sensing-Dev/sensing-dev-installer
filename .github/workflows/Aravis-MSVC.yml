@@ -1,0 +1,94 @@
+name: Aravis-MSVC
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  msvc:
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - version: 16
+          arch: x86_64
+          build_type_conan: Release
+          build_type_meson: release
+          aravis_version: "0.8.25"
+    steps:
+    - name: pip
+      run: |
+        pip install conan
+    - name: disable-perl
+      run: |
+        rm -r C:\Strawberry\perl
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: Clone and checkout specific tag of Aravis
+      run: |
+        git clone https://github.com/AravisProject/aravis.git installer/aravis
+        cd installer/aravis
+        git checkout "${{ matrix.aravis_version }}"
+    - name: conan
+      working-directory: installer/aravis
+      env:
+        INPUT_CONANFILE: |
+          [requires]
+          libiconv/1.17
+          glib/2.74.1
+          #gobject-introspection/1.69.0
+          gstreamer/1.19.2
+          gst-plugins-base/1.19.2
+          #gtk/4.4.0
+          libxml2/2.10.3
+          zlib/1.2.13
+          libusb/1.0.26
+
+          [build_requires]
+          meson/0.59.2
+          pkgconf/1.9.3
+
+          [generators]
+          pkg_config
+          virtualenv
+          virtualbuildenv
+          virtualrunenv
+
+          [options]
+          glib:shared=True
+          gstreamer:shared=True
+          gst-plugins-base:shared=True
+      run: |
+        $Env:INPUT_CONANFILE | Out-File -FilePath ${{ github.workspace }}\conanfile.txt -Encoding utf8
+        conan install -s os="Windows" -s compiler="Visual Studio" -s compiler.version=${{ matrix.version }} -s arch=${{ matrix.arch }} -s build_type=${{ matrix.build_type_conan }} -b pcre -b missing -b cascade -if build .
+    - name: meson
+      working-directory: installer/aravis
+      run: |
+        .\build\activate.ps1
+        .\build\activate_build.ps1
+        .\build\activate_run.ps1
+        echo "::group::configure"
+        meson --prefix ${{ github.workspace }}\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\build -Ddocumentation=disabled -Dgst-plugin=enabled -Dintrospection=disabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
+        echo "::endgroup::"
+        echo "::group::compile"
+        meson compile -C .\build -v
+        echo "::endgroup::"
+        echo "::group::install"
+        meson install -C .\build
+        echo "::endgroup::"
+    - name: test
+      run: |
+        .\build\activate.ps1
+        .\build\activate_build.ps1
+        .\build\activate_run.ps1
+        meson test -C .\build
+    - name: logs
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: msvc_${{ matrix.version }}_${{ matrix.arch }}_${{ matrix.build_type_meson }}_Meson_Testlog
+        path: build/meson-logs/testlog.txt
