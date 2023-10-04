@@ -43,7 +43,7 @@ jobs:
         conan profile detect
         conan create . --version="${{ matrix.aravis_version }}" -b missing -o gst_plugin=False -o introspection=False -o usb=True -o gv_n_buffers=1 -o viewer=False -o shared=True
     
-    - name: Build aravis using conan
+    - name: Install aravis using conan
       working-directory: installer  
       run: |
         conan install conanfile_aravis.py -b missing -pr .\conan_profile -of .
