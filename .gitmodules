@@ -1,3 +1,9 @@
 [submodule "installer/external/GenDC"]
 	path = installer/external/GenDC
 	url = https://github.com/Sensing-Dev/GenDC
+[submodule "installer/external/aravis"]
+	path = installer/external/aravis
+	url = https://github.com/AravisProject/aravis.git
+[submodule "installer/external/pygobject"]
+	path = installer/external/pygobject
+	url = https://gitlab.gnome.org/GNOME/pygobject.git
