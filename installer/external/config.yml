@@ -1,5 +1,5 @@
 libraries:
-  Aravis:
+  aravis:
     name: aravis
     src_path: aravis
     install_path: install/aravis
