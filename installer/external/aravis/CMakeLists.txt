@@ -22,31 +22,61 @@ string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
 
 # Set the variables
 list(GET OUTPUT_LIST 0 ARAVIS_NAME)
-list(GET OUTPUT_LIST 1 ARAVIS_SOURCE)
-list(GET OUTPUT_LIST 2 ARAVIS_INSTALL)
 list(GET OUTPUT_LIST 3 ARAVIS_ACTION)
-list(GET OUTPUT_LIST 4 ARAVIS_PKG_URL)
-list(GET OUTPUT_LIST 5 ARAVIS_PKG_SHA)
-list(GET OUTPUT_LIST 6 ARAVIS_GIT_REPO)
 list(GET OUTPUT_LIST 7 ARAVIS_VERSION)
 
 
 # Print to verify
 message("ARAVIS_NAME  ${ARAVIS_NAME}")
-message("ARAVIS_SOURCE : ${ARAVIS_SOURCE}")
-message("ARAVIS_INSTALL: ${ARAVIS_INSTALL}")
-message("ARAVIS_ACTION : ${ARAVIS_ACTION}")
-message("ARAVIS_PKG_URL: ${ARAVIS_PKG_URL}")
-message("ARAVIS_PKG_SHA : ${ARAVIS_PKG_SHA}")
-message("ARAVIS_GIT_REPO: ${ARAVIS_GIT_REPO}")
 message("ARAVIS_VERSION: ${ARAVIS_VERSION}")
+
+message("ARAVIS_ACTION : ${ARAVIS_ACTION}")
 
 set(ARAVIS_OS_FILE Aravis-${ARAVIS_VERSION})
 set(ARAVIS_DIR ${CMAKE_BINARY_DIR}/external/aravis/src/aravis)
 
 if(ARAVIS_ACTION STREQUAL "build")
-    message(STATUS "Case for value1")
+
+    list(GET OUTPUT_LIST 6 ARAVIS_GIT_REPO)
+
+    message("ARAVIS_GIT_REPO: ${ARAVIS_GIT_REPO}")
+    
+    FetchContent_Declare(
+        aravis
+        GIT_REPOSITORY ${ARAVIS_GIT_REPO}
+        GIT_TAG        ${ARAVIS_VERSION}
+    )
+    FetchContent_MakeAvailable(aravis)
+    if(NOT aravis_POPULATED)
+        FetchContent_Populate(aravis)
+    endif()
+
+    # Create a build directory for aravis within the populated content
+    set(ARAVIS_BUILD_DIR ${aravis_BINARY_DIR}/_build)
+
+    # Configure the project using Meson
+    execute_process(
+    COMMAND meson setup ${ARAVIS_BUILD_DIR} ${aravis_SOURCE_DIR}
+    RESULT_VARIABLE result
+    )
+    if(result)
+        message(FATAL_ERROR "Failed to configure aravis with meson")
+    endif()
+
+    # Now build it using Ninja (assuming you're using the Ninja backend with Meson)
+    execute_process(
+        COMMAND ninja -C ${ARAVIS_BUILD_DIR}
+        RESULT_VARIABLE result
+    )
+    if(result)
+        message(FATAL_ERROR "Failed to build aravis with ninja")
+    endif()
+
 elseif(ARAVIS_ACTION STREQUAL "download")
+    list(GET OUTPUT_LIST 4 ARAVIS_PKG_URL)
+    list(GET OUTPUT_LIST 5 ARAVIS_PKG_SHA)
+    message("ARAVIS_PKG_URL: ${ARAVIS_PKG_URL}")
+    message("ARAVIS_PKG_SHA : ${ARAVIS_PKG_SHA}")
     # # Add aravis external project
     ExternalProject_Add(
         aravis_external
@@ -64,6 +94,11 @@ elseif(ARAVIS_ACTION STREQUAL "download")
         BUILD_ALWAYS FALSE  # Adjust this according to your needs
         )
 elseif(ARAVIS_ACTION STREQUAL "use_existing")
+
+    list(GET OUTPUT_LIST 1 ARAVIS_SOURCE)
+    list(GET OUTPUT_LIST 2 ARAVIS_INSTALL)
+    message("ARAVIS_SOURCE : ${ARAVIS_SOURCE}")
+    message("ARAVIS_INSTALL: ${ARAVIS_INSTALL}")
     message(STATUS "Case for value3")
 else()
     message(STATUS "Default case")

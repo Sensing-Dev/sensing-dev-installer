@@ -2,7 +2,7 @@
 
 
 
-
+include(FetchContent)
 
 set(CONFIG_PATH "${CMAKE_SOURCE_DIR}/external/config.yml")
 
