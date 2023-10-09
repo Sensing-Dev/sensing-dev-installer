@@ -11,8 +11,72 @@ on:
 
 
 jobs:
-  aravis:
+  pygobject:
     runs-on: windows-2019
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - version: 192
+          arch: x86_64
+          build_type_conan: Release
+          build_type_meson: release
+          pygobject_version: "3.42.2"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Clone and checkout specific tag of Pygobject
+      run: |
+        git clone "https://gitlab.gnome.org/GNOME/pygobject.git
+        cd installer/pyobject
+        git checkout "${{ matrix.pygobject_version }}"
+
+    - name: Set up Python 
+      uses: actions/setup-python@v2
+      with:
+            python-version: "3.11.4"
+            
+    - name: Install Conan via pip
+      run: python -m pip install conan
+
+    - name: Disable Perl (remove from PATH)
+      run: |
+        Remove-Item -Path "C:\Strawberry" -Recurse
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Get dependencies using Conan
+      working-directory: installer/pygobject
+      run: |
+        conan profile detect
+        # conan create ..\external\pygobject\conanfile.py -b missing -pr ..\conan_profile --version "${{ matrix.pygobject_version }}"
+        conan install .. -b missing -pr ..\conan_profile -of .
+
+    - name: Build pygobject 
+      working-directory: installer/pygobject
+      run: |
+          .\build\generators\conanbuild.ps1
+          .\build\generators\conanrun.ps1
+          echo "::endgroup::"
+          echo "::group::configure"
+          meson setup --prefix ${{ github.workspace }}\installer\pygobject\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators --Dpycairo=disabled -Dtests=false. .\build
+          $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;%PKG_CONFIG_PATH%
+          echo "::endgroup::"
+          echo "::group::compile"
+          meson compile -C .\build -v
+          echo "::endgroup::"
+          echo "::group::install"
+          meson install -C .\build
+          echo "::endgroup::"
+
+  aravis:
+    needs: pygobject
+    runs-on: windows-2019
+    
 
     strategy:
       fail-fast: false
@@ -50,35 +114,38 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
 
-    - name: Get dependencies using Conan
-      working-directory: installer/aravis
-      run: |
-        conan profile detect
-        conan install .. -b missing -pr ..\conan_profile -of .
+    # - name: Get dependencies using Conan
+    #   working-directory: installer/aravis
+    #   run: |
+    #     conan profile detect
+    #     conan install .. -b missing -pr ..\conan_profile -of .
     
-    - name: Create ZIP from Conan installed files
-      working-directory: installer/aravis
-      run: |
-        Compress-Archive -Path build\dependencies\* -DestinationPath Aravis-dependencies.zip
+    # - name: Create ZIP from Conan installed files
+    #   working-directory: installer/aravis
+    #   run: |
+    #     Compress-Archive -Path build\dependencies\* -DestinationPath Aravis-dependencies.zip
 
-    - name: Upload Aravis-dependencies ZIP as artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: Aravis-dependencies_zip
-        path:  installer/aravis/Aravis-dependencies.zip
+    # - name: Upload Aravis-dependencies ZIP as artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: Aravis-dependencies_zip
+    #     path:  installer/aravis/Aravis-dependencies.zip
 
     - name: Build Aravis using meson 
       working-directory: installer/aravis
       run: |
         echo "::group::virtualenv"
-        Start-Process -FilePath cmd.exe `
-                -ArgumentList "/c call `
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"``
-        .\build\generators\conanbuild.ps1
-        .\build\generators\conanrun.ps1
+        # Start-Process -FilePath cmd.exe `
+        #         -ArgumentList "/c call `
+        # call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"``
+        ..\pygobject\build\generators\conanbuild.ps1
+        ..\pygobject\build\generators\conanrun.ps1
         echo "::endgroup::"
         echo "::group::configure"
-        meson setup --prefix ${{ github.workspace }}\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\build\generators -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
+        $env:PATH=${{ github.workspace }}\installer\pygobject\install\bin;$env:PATH
+        $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig;$env:PKG_CONFIG_PATH
+
+        meson setup --prefix ${{ github.workspace }}\installer\aravis\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
         echo "::endgroup::"
         echo "::group::compile"
         meson compile -C .\build -v
