@@ -20,22 +20,31 @@ def main():
     desired_action = args.action
     config_path = args.config_path
 
+    # print(f"library_name : {library_name}")
+    # print(f"desired_action : {desired_action}")
+    # print(f"config_path : {config_path}")
+
     with open(config_path, 'r') as file:
+        # print(f"file : {file}")
         config = yaml.safe_load(file)
         
         if library_name not in config['libraries']:
             print(f"No library named {library_name} found in {config_path}")
             return
         library = config['libraries'][library_name]
-        # print(f"library : {library}")
 
         # If the action is not provided via command line, fetch it from the config
         if  desired_action:
             library["action"] = desired_action
-
-            # print(f"library : {library}")        
         
-            print(library)
+        print(library.get("name"))
+        print(library.get("src_path"))
+        print(library.get("install_path"))
+        print(library.get("action"))
+        print(library.get("pkg_url"))
+        print(library.get("pkg_sha"))
+        print(library.get("git_repo"))
+        print(library.get("version"))
         
 if __name__ == "__main__":
     main()
