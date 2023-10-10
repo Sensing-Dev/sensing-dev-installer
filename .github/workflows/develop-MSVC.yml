@@ -3,7 +3,7 @@ name: Sensing dev installer Build, Test
 on:
   push:
     branches:
-      - '*'  # This will run the build and test jobs for every push on all branches
+      - 'feature/8-build-aravis-in-workflow'  # This will run the build and test jobs for every push on all branches
 
   # pull_request:
   #   branches:
