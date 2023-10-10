@@ -31,7 +31,7 @@ jobs:
     - name: Clone and checkout specific tag of Pygobject
       run: |
         git clone "https://gitlab.gnome.org/GNOME/pygobject.git"
-        cd installer/pyobject
+        cd installer/pygobject
         git checkout "${{ matrix.pygobject_version }}"
 
     - name: Set up Python 
