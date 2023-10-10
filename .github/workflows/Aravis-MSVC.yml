@@ -68,6 +68,7 @@ jobs:
     - name: meson
       working-directory: installer/aravis
       run: |
+       tree .\build /F
         .\build\activate.ps1
         .\build\activate_build.ps1
         .\build\activate_run.ps1
