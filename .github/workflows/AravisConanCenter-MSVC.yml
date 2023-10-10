@@ -21,6 +21,7 @@ jobs:
           gst_plugin: "False"
           introspection: "True"
           usb: "True"
+          viewer: "False"
           gv_n_buffers: 1
 
 
