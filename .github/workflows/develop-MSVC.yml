@@ -18,11 +18,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - version: 192
-          arch: x86_64
-          build_type_conan: Release
-          build_type_meson: release
+        - build_type_meson: release
           pygobject_version: "3.42.0"
+          pycairo: "disabled"
 
     steps:
     - name: Checkout code
@@ -66,7 +64,7 @@ jobs:
           --prefix ${{ github.workspace }}\installer\pygobject\install \
           --buildtype ${{ matrix.build_type_meson }} \
           --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators \
-          -Dpycairo=disabled \
+          -Dpycairo=${{ matrix.pycairo }} \
           -Dtests=false \
           . .\build
           $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;$env:PKG_CONFIG_PATH
@@ -87,11 +85,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - version: 192
-          arch: x86_64
-          build_type_conan: Release
-          build_type_meson: release
+        - build_type_meson: release
           aravis_version: "0.8.25"
+          gst_plugin: "disabled"
+          introspection: "enabled"
+          usb: "enabled"
+          viewer: "disabled "
+          gv_n_buffers: 1
 
     steps:
     - name: Checkout code
@@ -150,7 +150,17 @@ jobs:
         $env:PATH=${{ github.workspace }}\installer\pygobject\install\bin;$env:PATH
         $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig;$env:PKG_CONFIG_PATH
 
-        meson setup --prefix ${{ github.workspace }}\installer\aravis\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig -Ddocumentation=disabled -Dgst-plugin=disabled -Dintrospection=enabled -Dusb=enabled -Dviewer=disabled -Dgv-n-buffers=1 . .\build
+         meson setup \
+          --prefix ${{ github.workspace }}\installer\aravis\install \
+          --buildtype ${{ matrix.build_type_meson }} \
+          --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig \
+          -Ddocumentation=disabled \
+          -Dgst-plugin=${{ matrix.gst_plugin }} \
+          -Dintrospection=${{ matrix.introspection }} \
+          -Dusb=${{ matrix.usb }} \
+          -Dviewer=${{ matrix.viewer }} \
+          -Dgv-n-buffers=${{ matrix.gv_n_buffers }} \
+          . .\build
         echo "::endgroup::"
         echo "::group::compile"
         meson compile -C .\build -v
