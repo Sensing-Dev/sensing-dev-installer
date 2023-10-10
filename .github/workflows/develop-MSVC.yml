@@ -53,7 +53,6 @@ jobs:
       working-directory: installer/pygobject
       run: |
         conan profile detect
-        # conan create ..\external\pygobject\conanfile.py -b missing -pr ..\conan_profile --version "${{ matrix.pygobject_version }}"
         conan install .. -b missing -pr ..\conan_profile -of .
 
     - name: Build pygobject 
@@ -63,7 +62,13 @@ jobs:
           .\build\generators\conanrun.ps1
           echo "::endgroup::"
           echo "::group::configure"
-          meson setup --prefix ${{ github.workspace }}\installer\pygobject\install --buildtype ${{ matrix.build_type_meson }} --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators --Dpycairo=disabled -Dtests=false. .\build
+          meson setup \
+          --prefix ${{ github.workspace }}\installer\pygobject\install \
+          --buildtype ${{ matrix.build_type_meson }} \
+          --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators \
+          -Dpycairo=disabled \
+          -Dtests=false \
+          . .\build
           $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;%PKG_CONFIG_PATH%
           echo "::endgroup::"
           echo "::group::compile"
