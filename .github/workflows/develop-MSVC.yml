@@ -69,7 +69,7 @@ jobs:
           -Dpycairo=disabled \
           -Dtests=false \
           . .\build
-          $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;%PKG_CONFIG_PATH%
+          $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;$env:PKG_CONFIG_PATH
           echo "::endgroup::"
           echo "::group::compile"
           meson compile -C .\build -v
