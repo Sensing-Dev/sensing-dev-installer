@@ -56,6 +56,8 @@ jobs:
     - name: Build pygobject 
       working-directory: installer/pygobject
       run: |
+          $env:CC = "cl"
+          $env:CXX = "cl"
           .\build\generators\conanbuild.ps1
           .\build\generators\conanrun.ps1
           echo "::endgroup::"
