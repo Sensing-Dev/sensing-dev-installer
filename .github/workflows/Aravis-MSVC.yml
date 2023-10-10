@@ -24,7 +24,7 @@ jobs:
     steps:
     - name: pip
       run: |
-        pip install "conan==1.53.0"
+        pip install "conan==1.54.0"
     - name: disable-perl
       run: |
         rm -r C:\Strawberry\perl
