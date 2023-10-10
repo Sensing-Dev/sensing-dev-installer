@@ -43,13 +43,13 @@ jobs:
       working-directory: installer/external/aravis  
       run: |
         conan profile detect
-        conan create . --version="${{ matrix.aravis_version }}" \
-          -b missing \
-          -o gst_plugin="${{ matrix.gst_plugin }}" \
-          -o introspection="${{ matrix.introspection }}" \
-          -o usb="${{ matrix.usb }}" \
-          -o gv_n_buffers="${{ matrix.gv_n_buffers }}" \
-          -o viewer="${{ matrix.viewer }}" \
+        conan create . --version="${{ matrix.aravis_version }}" `
+          -b missing `
+          -o gst_plugin="${{ matrix.gst_plugin }}" `
+          -o introspection="${{ matrix.introspection }}" `
+          -o usb="${{ matrix.usb }}" `
+          -o gv_n_buffers="${{ matrix.gv_n_buffers }}" `
+          -o viewer="${{ matrix.viewer }}" `
           -o shared=True    
     - name: Install aravis using conan
       working-directory: installer  

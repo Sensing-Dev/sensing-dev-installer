@@ -60,12 +60,12 @@ jobs:
           .\build\generators\conanrun.ps1
           echo "::endgroup::"
           echo "::group::configure"
-          meson setup \
-          --prefix ${{ github.workspace }}\installer\pygobject\install \
-          --buildtype ${{ matrix.build_type_meson }} \
-          --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators \
-          -Dpycairo=${{ matrix.pycairo }} \
-          -Dtests=false \
+          meson setup `
+          --prefix ${{ github.workspace }}\installer\pygobject\install `
+          --buildtype ${{ matrix.build_type_meson }} `
+          --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators `
+          -Dpycairo=${{ matrix.pycairo }} `
+          -Dtests=false `
           . .\build
           $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;$env:PKG_CONFIG_PATH
           echo "::endgroup::"
@@ -150,16 +150,16 @@ jobs:
         $env:PATH=${{ github.workspace }}\installer\pygobject\install\bin;$env:PATH
         $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig;$env:PKG_CONFIG_PATH
 
-         meson setup \
-          --prefix ${{ github.workspace }}\installer\aravis\install \
-          --buildtype ${{ matrix.build_type_meson }} \
-          --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig \
-          -Ddocumentation=disabled \
-          -Dgst-plugin=${{ matrix.gst_plugin }} \
-          -Dintrospection=${{ matrix.introspection }} \
-          -Dusb=${{ matrix.usb }} \
-          -Dviewer=${{ matrix.viewer }} \
-          -Dgv-n-buffers=${{ matrix.gv_n_buffers }} \
+         meson setup `
+          --prefix ${{ github.workspace }}\installer\aravis\install `
+          --buildtype ${{ matrix.build_type_meson }} `
+          --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig `
+          -Ddocumentation=disabled `
+          -Dgst-plugin=${{ matrix.gst_plugin }} `
+          -Dintrospection=${{ matrix.introspection }} `
+          -Dusb=${{ matrix.usb }} `
+          -Dviewer=${{ matrix.viewer }} `
+          -Dgv-n-buffers=${{ matrix.gv_n_buffers }} `
           . .\build
         echo "::endgroup::"
         echo "::group::compile"
