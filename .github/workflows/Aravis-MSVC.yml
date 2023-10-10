@@ -36,6 +36,7 @@ jobs:
         cd installer/aravis
         git checkout "${{ matrix.aravis_version }}"
     - name: conan
+      working-directory: installer/aravis
       env:
         INPUT_CONANFILE: |
           [requires]
