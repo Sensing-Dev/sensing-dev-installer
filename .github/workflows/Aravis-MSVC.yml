@@ -64,7 +64,7 @@ jobs:
           gstreamer:shared=True
           gst-plugins-base:shared=True
       run: |
-        $Env:INPUT_CONANFILE | Out-File -FilePath ${{ github.workspace }}\conanfile.txt -Encoding utf8
+        $Env:INPUT_CONANFILE | Out-File -FilePath ${{ github.workspace }}\installer\aravis\conanfile.txt -Encoding utf8
         conan install -s os="Windows" -s compiler="Visual Studio" -s compiler.version=${{ matrix.version }} -s arch=${{ matrix.arch }} -s build_type=${{ matrix.build_type_conan }} -b missing -b cascade -if build .
     - name: meson
       working-directory: installer/aravis
