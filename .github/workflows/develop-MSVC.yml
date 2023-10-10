@@ -5,9 +5,9 @@ on:
     branches:
       - '*'  # This will run the build and test jobs for every push on all branches
 
-  pull_request:
-    branches:
-      - '*'  # This will run the build and test jobs for pull requests to all branches
+  # pull_request:
+  #   branches:
+  #     - '*'  # This will run the build and test jobs for pull requests to all branches
 
 
 jobs:
