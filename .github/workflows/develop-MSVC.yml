@@ -234,8 +234,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run tests
+        working-directory: installer
         run: |
-          echo "TODO : Running tests..."
+          .\tools\Env.ps1
+          python .\tests\sensing_dev_test.py
 
   
 
