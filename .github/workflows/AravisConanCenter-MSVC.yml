@@ -3,24 +3,26 @@ name: AravisConanCenter-MSVC
 on:
   push:
     branches: 
-     - '*' 
-  pull_request:
-    branches:
-     - '*' 
+     - 'feature/8-build-aravis-in-workflow' 
+  # pull_request:
+  #   branches:
+  #    - '*' 
   workflow_dispatch:
 
 jobs:
-  msvc:
+  aravis_conan_msvc:
     runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
         include:
-        - version: 16
-          arch: x86_64
-          build_type_conan: Release
-          build_type_meson: release
+        - build_type_meson: release
           aravis_version: "0.8.25"
+          gst_plugin: "False"
+          introspection: "True"
+          usb: "True"
+          gv_n_buffers: 1
+
 
     steps:     
 
@@ -41,8 +43,14 @@ jobs:
       working-directory: installer/external/aravis  
       run: |
         conan profile detect
-        conan create . --version="${{ matrix.aravis_version }}" -b missing -o gst_plugin=False -o introspection=True -o usb=True -o gv_n_buffers=1 -o viewer=False -o shared=True
-    
+        conan create . --version="${{ matrix.aravis_version }}" \
+          -b missing \
+          -o gst_plugin="${{ matrix.gst_plugin }}" \
+          -o introspection="${{ matrix.introspection }}" \
+          -o usb="${{ matrix.usb }}" \
+          -o gv_n_buffers="${{ matrix.gv_n_buffers }}" \
+          -o viewer="${{ matrix.viewer }}" \
+          -o shared=True    
     - name: Install aravis using conan
       working-directory: installer  
       run: |
