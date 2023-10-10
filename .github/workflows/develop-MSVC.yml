@@ -32,7 +32,7 @@ jobs:
       run: |
         git clone "https://gitlab.gnome.org/GNOME/pygobject.git
         cd installer/pyobject
-        git checkout "${{ matrix.pygobject_version }}"
+        git checkout ${{ matrix.pygobject_version }}
 
     - name: Set up Python 
       uses: actions/setup-python@v2
