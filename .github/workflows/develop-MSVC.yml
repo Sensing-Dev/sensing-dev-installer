@@ -15,6 +15,8 @@ env:
   PYTHON_VERSION: '3.11.4'
   PYGOBJECT_REPO_PATH: installer/pygobject
   PYGOBJECT_GIT_REPO: https://github.com/Sensing-Dev/pygobject.git
+  PYGOBJECT_PKG_URL: https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
+  PYGOBJECT_PKG_SHA: 'eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037'
   ARAVIS_REPO_PATH: installer/aravis
   ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
   BUILD_PATH: installer/build
@@ -23,106 +25,24 @@ env:
 jobs:
 
   pygobject:
-    runs-on: windows-2019
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - build_type_meson: "release"
-          pygobject_version: "672aa26093babdb9bc6d890cbeb1ed6af3b15053"
-          pycairo: "disabled"
+    runs-on: windows-2019     
 
     steps:
-    # --- Setup Environment ---
-    - name: Disable Perl And MinGW
-      run: |
-        choco uninstall mingw strawberryperl
-        
-        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Conan via pip
-      run: python -m pip install conan
-
-
     # --- Clone and Prepare Source ---
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
           submodules: recursive
-    - name: Cache Pygobject repo
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.PYGOBJECT_REPO_PATH }}
-        key: pygobject-${{ matrix.pygobject_version }}
-        restore-keys: |
-          pygobject-
-
-    - name: Clone and checkout specific tag of Pygobject
+    
+    # --- Download pkg ---
+    - name: Download ZIP file
       run: |
-        git version
-        git clone "${{ env.PYGOBJECT_GIT_REPO}}" ${{ env.PYGOBJECT_REPO_PATH }}
-        cd ${{ env.PYGOBJECT_REPO_PATH }}
-        git checkout "${{ matrix.pygobject_version }}"
+        Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
 
-    # --- Dependency Management ---
-    - name: Get dependencies using Conan
-      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+    - name: Unzip the file
       run: |
-        echo "::group::conan"
-        conan profile detect
-        conan install .. -b missing -pr ..\conan_profile -of .
-        echo "::endgroup::"
-
-    # --- Build with MSVC ---
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x64
-
-    - name: Build pygobject
-      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
-      run: |
-          echo "::group::virtualenv"
-          .\build\generators\conanbuild.ps1
-          .\build\generators\conanrun.ps1
-          echo "::endgroup::"
-
-
-          echo "::group::configure"
-          meson setup `
-          --prefix ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\install `
-          --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\build\generators `
-          -Dpycairo=${{ matrix.pycairo }} `
-          -Dtests=false `
-          . .\build
-          $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\build\dependencies;$env:PKG_CONFIG_PATH
-          echo "::endgroup::"
-
-
-          echo "::group::compile"
-          meson compile -C .\build -v
-          echo "::endgroup::"
-
-
-          echo "::group::install"
-          meson install -C .\build
-          echo "::endgroup::"
-
-      continue-on-error: true
-
-    # --- Error Handling ---
-    - name: Upload meson-log on failure
-      if: failure()  # This step will only run if any of the previous steps failed.
-      uses: actions/upload-artifact@v2
-      with:
-        name: meson-log
-        path: ${{ env.PYGOBJECT_REPO_PATH }}/build/meson-logs/meson-log.txt
+        Expand-Archive -Path pygobject.zip -DestinationPath ./${{ env.PYGOBJECT_REPO_PATH }}
+    
 
   aravis:
     needs: pygobject
