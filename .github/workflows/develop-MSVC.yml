@@ -14,7 +14,7 @@ on:
 env:
   PYTHON_VERSION: '3.11.4'
   PYGOBJECT_REPO_PATH: installer/pygobject
-  PYGOBJECT_GIT_REPO: https://gitlab.gnome.org/GNOME/pygobject.git
+  PYGOBJECT_GIT_REPO: https://github.com/Sensing-Dev/pygobject.git
   ARAVIS_REPO_PATH: installer/aravis
   ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
   BUILD_PATH: installer/build
@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         build_type_meson: [release]
-        pygobject_version: ["3.42.0"]
+        pygobject_version: ["672aa26"]
         pycairo: ["disabled"]
 
     steps:
