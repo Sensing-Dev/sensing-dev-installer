@@ -39,6 +39,7 @@ jobs:
     - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
+        choco upgrade git -y
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
       
     - name: Set up Python 
