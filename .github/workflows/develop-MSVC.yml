@@ -31,7 +31,7 @@ jobs:
         pygobject_version: ["3.42.0"]
         pycairo: ["disabled"]
 
-    steps:
+    steps:    
     - name: Setup Common Environment
       uses: ./.github/composite-actions/setup-environment
     - name: Cache Pygobject repo
