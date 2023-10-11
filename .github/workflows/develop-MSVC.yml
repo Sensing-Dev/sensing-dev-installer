@@ -86,6 +86,15 @@ jobs:
           meson install -C .\build
           echo "::endgroup::"
 
+      continue-on-error: true
+
+    - name: Upload meson-log on failure
+      if: failure()  # This step will only run if any of the previous steps failed.
+      uses: actions/upload-artifact@v2
+      with:
+        name: meson-log
+        path: ${{ env.PYGOBJECT_REPO_PATH }}/build/meson-logs/meson-log.txt
+
   aravis:
     needs: pygobject
     runs-on: windows-2019
@@ -152,6 +161,15 @@ jobs:
         echo "::group::install"
         meson install -C .\build
         echo "::endgroup::"
+
+      continue-on-error: true
+
+    - name: Upload meson-log on failure
+      if: failure()  # This step will only run if any of the previous steps failed.
+      uses: actions/upload-artifact@v2
+      with:
+        name: meson-log
+        path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
   
     - name: Create ZIP from installed files
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
