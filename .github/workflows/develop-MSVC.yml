@@ -24,28 +24,7 @@ env:
 
 jobs:
 
-  pygobject:
-    runs-on: windows-2019     
-
-    steps:
-    # --- Clone and Prepare Source ---
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
-    
-    # --- Download pkg ---
-    - name: Download ZIP file
-      run: |
-        Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
-
-    - name: Unzip the file
-      run: |
-        Expand-Archive -Path pygobject.zip -DestinationPath ./installer
-        ls ./${{ env.PYGOBJECT_REPO_PATH }}
-
   aravis:
-    needs: pygobject
     runs-on: windows-2019
     strategy:
       fail-fast: false
@@ -81,6 +60,16 @@ jobs:
       uses: actions/checkout@v2
       with:
           submodules: recursive
+    # --- Download pkg ---
+    - name: Download ZIP file
+      run: |
+        Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
+
+    - name: Unzip the file
+      run: |
+        Expand-Archive -Path pygobject.zip -DestinationPath ./installer
+        ls ./${{ env.PYGOBJECT_REPO_PATH }}
+
     - name: Cache Aravis repo
       uses: actions/cache@v2
       with:
