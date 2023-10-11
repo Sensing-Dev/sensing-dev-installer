@@ -58,10 +58,6 @@ jobs:
         choco uninstall mingw strawberryperl
         refreshenv
 
-        # choco uninstall gcc
-        # Remove-Item -Path "C:\ProgramData\Chocolatey\bin\gcc.exe" 
-        Remove-Item -Path "C:\Strawberry" -Recurse
-
     - name: Get dependencies using Conan
       working-directory: installer/pygobject
       run: |
