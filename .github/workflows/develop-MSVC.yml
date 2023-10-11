@@ -63,6 +63,7 @@ jobs:
 
     - name: Clone and checkout specific tag of Pygobject
       run: |
+        git version
         git clone "${{ env.PYGOBJECT_GIT_REPO}}" ${{ env.PYGOBJECT_REPO_PATH }}
         cd ${{ env.PYGOBJECT_REPO_PATH }}
         git checkout "${{ matrix.pygobject_version }}"
