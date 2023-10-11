@@ -79,10 +79,10 @@ jobs:
           aravis-
     - name: Clone and checkout specific tag of Aravis
       run: |
-        git clone --depth 1 `
+        git clone --depth 1 
                   -b "${{ matrix.aravis_version }}" `
-                  ${{ env.ARAVIS_REPO }} `
-                  ${{ env.ARAVIS_PATH }}
+                  ${{ env.ARAVIS_GIT_REPO }} `
+                  ${{ env.ARAVIS_REPO_PATH }}
       # --- Dependency Management ---
     - name: Get dependencies using Conan
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
