@@ -111,6 +111,10 @@ jobs:
           gv_n_buffers: 1
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+          submodules: recursive
     - name: Setup Common Environment
       uses: ./.github/composite-actions/setup-environment
     - name: Cache Aravis repo
@@ -189,6 +193,10 @@ jobs:
     runs-on: windows-latest
     
     steps: 
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+          submodules: recursive
     - name: Setup Common Environment
       uses: ./.github/composite-actions/setup-environment
 
