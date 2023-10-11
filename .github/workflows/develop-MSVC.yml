@@ -45,8 +45,8 @@ jobs:
         $env:PATH
         Get-ChildItem -Path "C:\ProgramData\Chocolatey\bin"
 
-        $gccPath = Get-Command gcc | Select-Object Source
-        Remove-Item -Path "$gccPath" 
+        # $gccPath = Get-Command gcc | Select-Object Source
+        Remove-Item -Path "C:\ProgramData\Chocolatey\bin\gcc.exe" 
         Remove-Item -Path "C:\Strawberry" -Recurse
 
     - name: Add msbuild to PATH
@@ -61,11 +61,11 @@ jobs:
     - name: Build pygobject 
       working-directory: installer/pygobject
       run: |
-          $vsPath = & "C:\ProgramData\Chocolatey\bin\vswhere.exe -products * -requires Microsoft.Component.MSBuild -property installationPath -latest"
-          Push-Location
-          Set-Location "$vsPath\Common7\Tools"
-          & "./VsDevCmd.bat"
-          Pop-Location
+          # $vsPath = & "C:\ProgramData\Chocolatey\bin\vswhere.exe -products * -requires Microsoft.Component.MSBuild -property installationPath -latest"
+          # Push-Location
+          # Set-Location "$vsPath\Common7\Tools"
+          # & "./VsDevCmd.bat"
+          # Pop-Location
 
           $env:CC = "cl"
           $env:CXX = "cl"
