@@ -54,9 +54,8 @@ jobs:
 
     - name: Disable Perl (remove from PATH)
       run: |
-        # choco list -i
         choco uninstall mingw strawberryperl
-        refreshenv
+        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
 
     - name: Get dependencies using Conan
       working-directory: installer/pygobject

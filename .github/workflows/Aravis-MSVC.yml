@@ -37,7 +37,7 @@ jobs:
     - name: Disable Perl
       run: |
         choco uninstall mingw strawberryperl
-        refreshenv
+        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
 
     # --- Clone and Prepare Source ---
     - name: Checkout Repository
