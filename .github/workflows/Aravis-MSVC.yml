@@ -34,7 +34,7 @@ jobs:
       run: |
         pip install "conan==${{ env.CONAN_VERSION }}"
 
-    - name: Disable Perl
+    - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1

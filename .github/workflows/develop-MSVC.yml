@@ -52,7 +52,7 @@ jobs:
     - name: Install Conan via pip
       run: python -m pip install conan
 
-    - name: Disable Perl (remove from PATH)
+    - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
