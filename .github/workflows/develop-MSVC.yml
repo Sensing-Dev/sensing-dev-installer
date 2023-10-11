@@ -41,7 +41,7 @@ jobs:
 
     - name: Unzip the file
       run: |
-        Expand-Archive -Path pygobject.zip -DestinationPath ./${{ env.PYGOBJECT_REPO_PATH }}
+        Expand-Archive -Path pygobject.zip -DestinationPath ./installer
         ls ./${{ env.PYGOBJECT_REPO_PATH }}
 
   aravis:
