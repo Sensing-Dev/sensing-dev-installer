@@ -20,9 +20,9 @@ env:
   BUILD_PATH: installer/build
 
 
-jobs: 
+jobs:
 
-  pygobject:    
+  pygobject:
     runs-on: windows-2019
     strategy:
       fail-fast: false
@@ -32,29 +32,27 @@ jobs:
         pycairo: ["disabled"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive    
+    # --- Setup Environment ---
     - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
         choco upgrade git -y
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-      
-    - name: Set up Python 
+
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      
+
     - name: Install Conan via pip
       run: python -m pip install conan
-      
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
+
+
+    # --- Clone and Prepare Source ---
+    - name: Checkout repository
+      uses: actions/checkout@v2
       with:
-        arch: x64
-      
+          submodules: recursive
     - name: Cache Pygobject repo
       uses: actions/cache@v2
       with:
@@ -62,13 +60,14 @@ jobs:
         key: pygobject-${{ matrix.pygobject_version }}
         restore-keys: |
           pygobject-
-          
+
     - name: Clone and checkout specific tag of Pygobject
       run: |
         git clone "${{ env.PYGOBJECT_GIT_REPO}}" ${{ env.PYGOBJECT_REPO_PATH }}
         cd ${{ env.PYGOBJECT_REPO_PATH }}
         git checkout "${{ matrix.pygobject_version }}"
 
+    # --- Dependency Management ---
     - name: Get dependencies using Conan
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
@@ -77,7 +76,13 @@ jobs:
         conan install .. -b missing -pr ..\conan_profile -of .
         echo "::endgroup::"
 
-    - name: Build pygobject 
+    # --- Build with MSVC ---
+    - name: Setup MSVC Developer Command Prompt
+      uses: TheMrMilchmann/setup-msvc-dev@v3
+      with:
+        arch: x64
+
+    - name: Build pygobject
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
           echo "::group::virtualenv"
@@ -109,6 +114,7 @@ jobs:
 
       continue-on-error: true
 
+    # --- Error Handling ---
     - name: Upload meson-log on failure
       if: failure()  # This step will only run if any of the previous steps failed.
       uses: actions/upload-artifact@v2
@@ -132,28 +138,27 @@ jobs:
           gv_n_buffers: 1
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
+    # --- Setup Environment ---
+
     - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-      
-    - name: Set up Python 
+
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      
+
     - name: Install Conan via pip
       run: python -m pip install conan
-      
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
+
+
+    # --- Clone and Prepare Source ---
+    - name: Checkout repository
+      uses: actions/checkout@v2
       with:
-        arch: x64
-      
+          submodules: recursive
     - name: Cache Aravis repo
       uses: actions/cache@v2
       with:
@@ -167,7 +172,13 @@ jobs:
                   -b "${{ matrix.aravis_version }}" `
                   ${{ env.ARAVIS_REPO }} `
                   ${{ env.ARAVIS_PATH }}
-    - name: Build Aravis using meson 
+
+     # --- Build with MSVC ---
+    - name: Setup MSVC Developer Command Prompt
+      uses: TheMrMilchmann/setup-msvc-dev@v3
+      with:
+        arch: x64
+    - name: Build Aravis using meson
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         echo "::group::virtualenv"
@@ -211,7 +222,7 @@ jobs:
       with:
         name: meson-log
         path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
-  
+
     - name: Create ZIP from installed files
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
@@ -228,8 +239,8 @@ jobs:
   build:
     needs: aravis
     runs-on: windows-latest
-    
-    steps: 
+
+    steps:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -238,19 +249,19 @@ jobs:
       run: |
         choco uninstall mingw strawberryperl
         Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-      
-    - name: Set up Python 
+
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-      
+
     - name: Install Conan via pip
       run: python -m pip install conan
-      
+
     - name: Setup MSVC Developer Command Prompt
       uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
-        arch: x64      
+        arch: x64
 
     - name: Create and enter build directory
       run: |
@@ -287,7 +298,7 @@ jobs:
         name: sensing-dev-installer-zip
         path: |
           ${{ env.BUILD_PATH}}/*.zip
-            
+
   test:
     needs: build
     runs-on: windows-latest
