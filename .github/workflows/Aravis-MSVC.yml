@@ -30,6 +30,8 @@ jobs:
 
       - name: Disable Perl
         run: |
+          choco uninstall mingw strawberryperl
+          refreshenv
           rm -r C:\Strawberry\perl
 
       - name: Checkout Repository
