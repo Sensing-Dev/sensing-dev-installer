@@ -54,6 +54,8 @@ jobs:
 
     - name: Disable Perl (remove from PATH)
       run: |
+        choco list --local-only
+
         # choco uninstall gcc
         # Remove-Item -Path "C:\ProgramData\Chocolatey\bin\gcc.exe" 
         Remove-Item -Path "C:\Strawberry" -Recurse
