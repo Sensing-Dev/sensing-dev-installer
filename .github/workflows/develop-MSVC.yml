@@ -13,20 +13,17 @@ on:
 
 env:
   PYTHON_VERSION: '3.11.4'
+  PYGOBJECT_REPO_PATH: installer/pygobject
+  PYGOBJECT_GIT_REPO: https://gitlab.gnome.org/GNOME/pygobject.git
+  ARAVIS_REPO_PATH: installer/aravis
+  ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
+  BUILD_PATH: installer/build
 
-jobs:
-  setup-environment:
+
+jobs: 
+
+  pygobject:    
     runs-on: windows-2019
-    outputs:
-      workspace: ${{ github.workspace }}
-    steps:
-    - name: Define Environment Variables
-      run: echo "::set-output name=workspace::${{ github.workspace }}"
-
-  pygobject:
-    needs: setup-environment
-    runs-on: windows-2019
-
     strategy:
       fail-fast: false
       matrix:
@@ -35,66 +32,56 @@ jobs:
         pycairo: ["disabled"]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
+    - name: Setup Common Environment
+      uses: ./.github/composite-actions/setup-environment
+    - name: Cache Pygobject repo
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.PYGOBJECT_REPO_PATH }}
+        key: pygobject-${{ matrix.pygobject_version }}
+        restore-keys: |
+          pygobject-
+          
     - name: Clone and checkout specific tag of Pygobject
       run: |
-        git clone "https://gitlab.gnome.org/GNOME/pygobject.git" installer/pygobject
-        cd installer/pygobject
+        git clone "${{ env.PYGOBJECT_GIT_REPO}}" ${{ env.PYGOBJECT_REPO_PATH }}
+        cd ${{ env.PYGOBJECT_REPO_PATH }}
         git checkout "${{ matrix.pygobject_version }}"
 
-    - name: Set up Python 
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Conan via pip
-      run: python -m pip install conan
-
-    - name: Disable Perl And MinGW
-      run: |
-        choco uninstall mingw strawberryperl
-        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-
     - name: Get dependencies using Conan
-      working-directory: installer/pygobject
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
+        echo "::group::conan"
         conan profile detect
         conan install .. -b missing -pr ..\conan_profile -of .
-
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x64    
+        echo "::endgroup::"
 
     - name: Build pygobject 
-      working-directory: installer/pygobject
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
-          # $vsPath = & "C:\ProgramData\Chocolatey\bin\vswhere.exe -products * -requires Microsoft.Component.MSBuild -property installationPath -latest"
-          # Push-Location
-          # Set-Location "$vsPath\Common7\Tools"
-          # & "./VsDevCmd.bat"
-          # Pop-Location
-
-          # $env:CC = "cl"
-          # $env:CXX = "cl"
+          echo "::group::virtualenv"
           .\build\generators\conanbuild.ps1
           .\build\generators\conanrun.ps1
           echo "::endgroup::"
+
+
           echo "::group::configure"
           meson setup `
-          --prefix ${{ github.workspace }}\installer\pygobject\install `
+          --prefix ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\install `
           --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\installer\pygobject\build\generators `
+          --pkg-config-path ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\build\generators `
           -Dpycairo=${{ matrix.pycairo }} `
           -Dtests=false `
           . .\build
-          $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\build\dependencies;$env:PKG_CONFIG_PATH
+          $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\build\dependencies;$env:PKG_CONFIG_PATH
           echo "::endgroup::"
+
+
           echo "::group::compile"
           meson compile -C .\build -v
           echo "::endgroup::"
+
+
           echo "::group::install"
           meson install -C .\build
           echo "::endgroup::"
@@ -102,8 +89,6 @@ jobs:
   aravis:
     needs: pygobject
     runs-on: windows-2019
-    
-
     strategy:
       fail-fast: false
       matrix:
@@ -113,55 +98,42 @@ jobs:
           gst_plugin: "disabled"
           introspection: "enabled"
           usb: "enabled"
-          viewer: "disabled "
+          viewer: "disabled"
           gv_n_buffers: 1
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Setup Common Environment
+      uses: ./.github/composite-actions/setup-environment
+    - name: Cache Aravis repo
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.ARAVIS_REPO_PATH }}
+        key: aravis-${{ matrix.aravis_version }}
+        restore-keys: |
+          aravis-
     - name: Clone and checkout specific tag of Aravis
       run: |
-        git clone https://github.com/AravisProject/aravis.git installer/aravis
-        cd installer/aravis
-        git checkout "${{ matrix.aravis_version }}"
-
-    - name: Set up Python 
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Conan via pip
-      run: python -m pip install conan
-
-    - name: Disable Perl (remove from PATH)
-      run: |
-       $gccPath = Get-Command gcc | Select-Object Source
-       Remove-Item -Path "$gccPath" 
-       Remove-Item -Path "C:\Strawberry" -Recurse
-
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x64
-
+        git clone --depth 1 `
+                  -b "${{ matrix.aravis_version }}" `
+                  ${{ env.ARAVIS_REPO }} `
+                  ${{ env.ARAVIS_PATH }}
     - name: Build Aravis using meson 
-      working-directory: installer/aravis
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         echo "::group::virtualenv"
-        # Start-Process -FilePath cmd.exe `
-        #         -ArgumentList "/c call `
-        # call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"``
         ..\pygobject\build\generators\conanbuild.ps1
         ..\pygobject\build\generators\conanrun.ps1
         echo "::endgroup::"
-        echo "::group::configure"
-        $env:PATH=${{ github.workspace }}\installer\pygobject\install\bin;$env:PATH
-        $env:PKG_CONFIG_PATH=${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig;$env:PKG_CONFIG_PATH
 
-         meson setup `
-          --prefix ${{ github.workspace }}\installer\aravis\install `
+
+        echo "::group::configure"
+        $env:PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\install\bin;$env:PATH
+        $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\install\lib\pkgconfig;$env:PKG_CONFIG_PATH
+
+        meson setup `
+          --prefix ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\install `
           --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\installer\aravis\pygobject\generators;${{ github.workspace }}\installer\pygobject\install\lib\pkgconfig `
+          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\pygobject\generators;${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\install\lib\pkgconfig `
           -Ddocumentation=disabled `
           -Dgst-plugin=${{ matrix.gst_plugin }} `
           -Dintrospection=${{ matrix.introspection }} `
@@ -170,16 +142,19 @@ jobs:
           -Dgv-n-buffers=${{ matrix.gv_n_buffers }} `
           . .\build
         echo "::endgroup::"
+
+
         echo "::group::compile"
         meson compile -C .\build -v
         echo "::endgroup::"
+
+
         echo "::group::install"
         meson install -C .\build
         echo "::endgroup::"
-
   
     - name: Create ZIP from installed files
-      working-directory: installer/aravis
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         Compress-Archive -Path install\* -DestinationPath aravis_${{ matrix.aravis_version }}.zip
 
@@ -187,7 +162,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name:  aravis_${{ matrix.aravis_version }}_zip
-        path:  installer/aravis/aravis_${{ matrix.aravis_version }}.zip
+        path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_${{ matrix.aravis_version }}.zip
 
 
 
@@ -195,71 +170,52 @@ jobs:
     needs: aravis
     runs-on: windows-latest
     
-    steps:     
+    steps: 
+    - name: Setup Common Environment
+      uses: ./.github/composite-actions/setup-environment
 
-      - name: Disable Perl (remove from PATH)
-        run: echo "C:\Strawberry\perl" | Out-Null
+    - name: Create and enter build directory
+      run: |
+        cd installer
+        mkdir build
+        cd build
 
-      - name: Install WiX Toolset
-        run: choco install wixtoolset -y
+    - name: Run CMake
+      working-directory: ${{ env.BUILD_PATH}}
+      run: cmake -G "Visual Studio 17 2022" -A x64 ../
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+    - name: Build with CMake
+      working-directory: ${{ env.BUILD_PATH}}
+      run: cmake --build . --config Release
 
-      - name: Create and enter build directory
-        run: |
-          cd installer
-          mkdir build
-          cd build
+    - name: Package with CPack WIX
+      working-directory: ${{ env.BUILD_PATH}}
+      run: cpack -G "WIX"
 
-      - name: Run CMake
-        working-directory: installer/build
-        run: cmake -G "Visual Studio 17 2022" -A x64 ../
+    - name: Upload artifacts MSI
+      uses: actions/upload-artifact@v2
+      with:
+        name: sensing-dev-installer-msi
+        path: |
+          ${{ env.BUILD_PATH}}/*.msi
 
-      - name: Build with CMake
-        working-directory: installer/build
-        run: cmake --build . --config Release
+    - name: Create package zip
+      working-directory: ${{ env.BUILD_PATH}}
+      run: cpack -G "ZIP"
 
-      - name: Package with CPack WIX
-        working-directory: installer/build
-        run: cpack -G "WIX"
-
-      - name: Upload artifacts MSI
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-msi
-          path: |
-            installer/build/*.msi
-
-      - name: Create package zip
-        working-directory: installer/build
-        run: cpack -G "ZIP"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-zip
-          path: |
-            installer/build/*.zip
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: sensing-dev-installer-zip
+        path: |
+          ${{ env.BUILD_PATH}}/*.zip
             
   test:
     needs: build
     runs-on: windows-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Run tests
-        working-directory: installer
-        run: |
-          .\tools\Env.ps1
-          python .\tests\sensing_dev_test.py
-
-  
-
-
-
-
+    - name: Run tests
+      working-directory: installer
+      run: |
+        .\tools\Env.ps1
+        python .\tests\sensing_dev_test.py
