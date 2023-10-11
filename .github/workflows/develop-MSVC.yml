@@ -61,11 +61,11 @@ jobs:
       with:
           submodules: recursive
     # --- Download pkg ---
-    - name: Download ZIP file
+    - name: Download pygobject ZIP file
       run: |
         Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
 
-    - name: Unzip the file
+    - name: Unzip the pygobject file
       run: |
         Expand-Archive -Path pygobject.zip -DestinationPath ./installer
         ls ./${{ env.PYGOBJECT_REPO_PATH }}
@@ -83,6 +83,14 @@ jobs:
                   -b "${{ matrix.aravis_version }}" `
                   ${{ env.ARAVIS_REPO }} `
                   ${{ env.ARAVIS_PATH }}
+      # --- Dependency Management ---
+    - name: Get dependencies using Conan
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
+      run: |
+        echo "::group::conan"
+        conan profile detect
+        conan install .. -b missing -pr ..\conan_profile -of .
+        echo "::endgroup::"
 
      # --- Build with MSVC ---
     - name: Setup MSVC Developer Command Prompt
@@ -93,8 +101,8 @@ jobs:
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         echo "::group::virtualenv"
-        ..\pygobject\build\generators\conanbuild.ps1
-        ..\pygobject\build\generators\conanrun.ps1
+        .\build\generators\conanbuild.ps1
+        .\build\generators\conanrun.ps1
         echo "::endgroup::"
 
 
