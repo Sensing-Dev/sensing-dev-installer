@@ -43,6 +43,9 @@ jobs:
     - name: Disable Perl (remove from PATH)
       run: |
         $env:PATH
+
+        choco uninstall gcc
+
         Get-ChildItem -Path "C:\ProgramData\Chocolatey\bin"
 
         # $gccPath = Get-Command gcc | Select-Object Source
