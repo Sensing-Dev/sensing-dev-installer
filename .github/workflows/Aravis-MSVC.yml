@@ -27,6 +27,8 @@ jobs:
         pip install "conan==1.57.0"
     - name: disable-perl
       run: |
+        $gccPath = Get-Command gcc | Select-Object Source
+        Remove-Item -Path "$gccPath" 
         rm -r C:\Strawberry\perl
     - name: checkout
       uses: actions/checkout@v3
