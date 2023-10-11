@@ -3,11 +3,6 @@ description: 'Common setup steps for environment'
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
-      shell: powershell
     - name: Disable Perl And MinGW
       run: |
         choco uninstall mingw strawberryperl
