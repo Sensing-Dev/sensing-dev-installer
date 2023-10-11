@@ -27,9 +27,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build_type_meson: [release]
-        pygobject_version: ["672aa26"]
-        pycairo: ["disabled"]
+        include:
+        - build_type_meson: "release"
+          pygobject_version: "672aa26093babdb9bc6d890cbeb1ed6af3b15053"
+          pycairo: "disabled"
 
     steps:
     # --- Setup Environment ---
