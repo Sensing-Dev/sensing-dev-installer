@@ -45,9 +45,9 @@ jobs:
 
     - name: Shallow Clone and Checkout Aravis Tag
       run: |
-        git clone --depth 1 
-                  -b "${{ matrix.aravis_version }}" 
-                  ${{ env.ARAVIS_REPO }} 
+        git clone --depth 1 `
+                  -b "${{ matrix.aravis_version }}" `
+                  ${{ env.ARAVIS_REPO }} `
                   ${{ env.ARAVIS_PATH }}
 
     # --- Dependency Management ---
@@ -90,13 +90,13 @@ jobs:
     - name: Install Conan Dependencies
       working-directory: ${{ env.ARAVIS_PATH }}
       run: |
-        conan install -s os="Windows" 
-                      -s compiler="Visual Studio" 
-                      -s compiler.version=${{ matrix.version }} 
-                      -s arch=${{ matrix.arch }} 
-                      -s build_type=${{ matrix.build_type_conan }} 
-                      -b missing 
-                      -b cascade 
+        conan install -s os="Windows" `
+                      -s compiler="Visual Studio" `
+                      -s compiler.version=${{ matrix.version }} `
+                      -s arch=${{ matrix.arch }} `
+                      -s build_type=${{ matrix.build_type_conan }} `
+                      -b missing `
+                      -b cascade `
                       -if build .
 
     # --- Build with MSVC ---
