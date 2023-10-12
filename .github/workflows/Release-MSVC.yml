@@ -54,9 +54,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
+            installer/tools/installer.ps1
             installer/build/*.msi
             installer/build/*.zip
-            installer/tools/installer.ps1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
