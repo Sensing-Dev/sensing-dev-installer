@@ -79,7 +79,7 @@ jobs:
           aravis-
     - name: Clone and checkout specific tag of Aravis
       run: |
-        git clone --depth 1 
+        git clone --depth 1 `
                   -b "${{ matrix.aravis_version }}" `
                   ${{ env.ARAVIS_GIT_REPO }} `
                   ${{ env.ARAVIS_REPO_PATH }}
