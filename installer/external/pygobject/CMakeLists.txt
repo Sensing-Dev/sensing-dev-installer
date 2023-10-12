@@ -1,45 +1,78 @@
 include(ExternalProject)
 
-# Define pygobject version
-set(PYGOBJECT_VERSION 3.42.2)
+# Define variables
+set(PYGOBJECT_NAME "pygobject")
+set(PYGOBJECT_ACTION "download") # You can set this to a specific action or leave it empty
 
-# Set URLs for Windows and Linux
-	#https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
-set(PYGOBJECT_WIN_URL "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip")
-set(PYGOBJECT_WIN_URL_HASH "eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037")
-
-# Determine the operating system
-if(WIN32)
-    set(PYGOBJECT_OS_URL ${PYGOBJECT_WIN_URL})
-    set(PYGOBJECT_OS_HASH ${PYGOBJECT_WIN_URL_HASH})
-    # set(PYGOBJECT_OS_FILE pygobject-${PYGOBJECT_VERSION})
-    set(PYGOBJECT_OS_FILE pygobject-${PYGOBJECT_VERSION})
-elseif(UNIX)
-
-else()
-    message(FATAL_ERROR "Unsupported operating system")
-endif()
-
-set(PYGOBJECT_DIR ${CMAKE_BINARY_DIR}/external/pygobject/src/pygobject)
-
-# Add pygobject external project
-
-ExternalProject_Add(
-    pygobject_external
-    PREFIX ${CMAKE_BINARY_DIR}/external/pygobject
-    URL ${PYGOBJECT_OS_URL}
-    URL_HASH SHA256=${PYGOBJECT_OS_HASH}  # Use SHA-256 hash
-    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/pygobject/downloads  # Specify a downloads directory
-    SOURCE_DIR ${PYGOBJECT_DIR}
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    CONFIGURE_COMMAND ""  # No configure step needed
-    BUILD_COMMAND ""  # No build step needed
-    INSTALL_COMMAND  ""
-    # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${PYGOBJECT_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/pygobject' -Force"
-    BUILD_IN_SOURCE FALSE
-    BUILD_ALWAYS FALSE  # Adjust this according to your needs
+# Call the Python script and capture its output
+execute_process(
+    COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${PYGOBJECT_NAME} --action ${PYGOBJECT_ACTION} --config-path ${CONFIG_PATH}
+    OUTPUT_VARIABLE OUTPUT_VALUE
+    RESULTS_VARIABLE  RESULT_CODE
+    ERROR_VARIABLE error
 )
 
+
+if(RESULT_CODE)
+    message(FATAL_ERROR "Error while parsing config: ${OUTPUT_VALUE}")
+endif()
+
+#Split the output into a list
+string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
+
+# Set the variables
+list(GET OUTPUT_LIST 0 PYGOBJECT_NAME)
+list(GET OUTPUT_LIST 7 PYGOBJECT_VERSION)
+list(GET OUTPUT_LIST 3 PYGOBJECT_ACTION)
+
+
+# Print to verify
+message("PYGOBJECT_NAME  ${PYGOBJECT_NAME}")
+message("PYGOBJECT_VERSION: ${PYGOBJECT_VERSION}")
+message("PYGOBJECT_ACTION : ${PYGOBJECT_ACTION}")
+
+
+set(PYGOBJECT_OS_FILE pygobject-${PYGOBJECT_VERSION})
+set(PYGOBJECT_DIR ${CMAKE_BINARY_DIR}/external/pygobject/src/pygobject)
+
+if(PYGOBJECT_ACTION STREQUAL "build")
+    list(GET OUTPUT_LIST 1 PYGOBJECT_SOURCE)
+    list(GET OUTPUT_LIST 2 PYGOBJECT_INSTALL)
+    list(GET OUTPUT_LIST 6 PYGOBJECT_GIT_REPO)
+    message("PYGOBJECT_SOURCE : ${PYGOBJECT_SOURCE}")
+    message("PYGOBJECT_INSTALL: ${PYGOBJECT_INSTALL}")
+    message("PYGOBJECT_GIT_REPO: ${PYGOBJECT_GIT_REPO}")
+    message(FATAL_ERROR "Option Unimplemented")
+elseif(PYGOBJECT_ACTION STREQUAL "download")
+    # # Add aravis external project
+    
+    list(GET OUTPUT_LIST 4 PYGOBJECT_PKG_URL)
+    list(GET OUTPUT_LIST 5 PYGOBJECT_PKG_SHA)
+
+    message("PYGOBJECT_PKG_URL: ${PYGOBJECT_PKG_URL}")
+    message("PYGOBJECT_PKG_SHA : ${PYGOBJECT_PKG_SHA}")
+    ExternalProject_Add(
+        pygobject_external
+        PREFIX ${CMAKE_BINARY_DIR}/external/pygobject
+        URL ${PYGOBJECT_PKG_URL}
+        URL_HASH SHA256=${PYGOBJECT_PKG_SHA}  # Use SHA-256 hash
+        DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/pygobject/downloads  # Specify a downloads directory
+        SOURCE_DIR ${PYGOBJECT_DIR}
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND ""  # No configure step needed
+        BUILD_COMMAND ""  # No build step needed
+        INSTALL_COMMAND  ""
+        # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${PYGOBJECT_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/pygobject' -Force"
+        BUILD_IN_SOURCE FALSE
+        BUILD_ALWAYS FALSE  # Adjust this according to your needs
+    )  
+    # Add pygobject external project
+    
+elseif(PYGOBJECT_ACTION STREQUAL "use_existing")
+    message(FATAL_ERROR "Option Unimplemented")
+else()
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
+endif()
 
 # Specify the pygobject library and include directories
 add_library(pygobject INTERFACE)

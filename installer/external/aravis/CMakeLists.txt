@@ -2,7 +2,7 @@ include(ExternalProject)
 
 # Define variables
 set(ARAVIS_NAME "aravis")
-set(ARAVIS_ACTION "build") # You can set this to a specific action or leave it empty
+set(ARAVIS_ACTION "download") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
@@ -53,10 +53,14 @@ if(ARAVIS_ACTION STREQUAL "build")
 
     # Create a build directory for aravis within the populated content
     set(ARAVIS_BUILD_DIR ${aravis_BINARY_DIR}/_build)
+    set(ARAVIS_INSTALL_DIR ${aravis_BINARY_DIR}/_install)
+
+    message(FATAL_ERROR "Option Unimplemented")
 
     # Configure the project using Meson
+    string(TOLOWER ${CMAKE_BUILD_TYPE} MESON_BUILD_TYPE)
     execute_process(
-    COMMAND meson setup ${ARAVIS_BUILD_DIR} ${aravis_SOURCE_DIR}
+    COMMAND meson setup --prefix ${ARAVIS_INSTALL_DIR} --buildtype ${MESON_BUILD_TYPE} ${ARAVIS_BUILD_DIR} ${aravis_SOURCE_DIR} 
     RESULT_VARIABLE result
     )
     if(result)
@@ -65,7 +69,7 @@ if(ARAVIS_ACTION STREQUAL "build")
 
     # Now build it using Ninja (assuming you're using the Ninja backend with Meson)
     execute_process(
-        COMMAND ninja -C ${ARAVIS_BUILD_DIR}
+        COMMAND ninja -C ${ARAVIS_BUILD_DIR} --prefix
         RESULT_VARIABLE result
     )
     if(result)
@@ -99,9 +103,9 @@ elseif(ARAVIS_ACTION STREQUAL "use_existing")
     list(GET OUTPUT_LIST 2 ARAVIS_INSTALL)
     message("ARAVIS_SOURCE : ${ARAVIS_SOURCE}")
     message("ARAVIS_INSTALL: ${ARAVIS_INSTALL}")
-    message(STATUS "Case for value3")
+    message(FATAL_ERROR "Option Unimplemented")
 else()
-    message(STATUS "Default case")
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
 endif()
 
 set(ARAVIS_DEP_DIR "${CMAKE_BINARY_DIR}/external/aravis_dependencies/src/aravis_dep")
@@ -126,37 +130,37 @@ ExternalProject_Add(
 
 
 
-# # Install aravis library, binaries, includes, and shared files
-# # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/aravis/ DESTINATION install)
-# install(DIRECTORY ${ARAVIS_DIR}/include/ DESTINATION include)
-# install(DIRECTORY ${ARAVIS_DIR}/bin/ DESTINATION bin)
-# install(DIRECTORY ${ARAVIS_DIR}/share/ DESTINATION share)
-# install(DIRECTORY ${ARAVIS_DIR}/lib/ DESTINATION lib)
-# # install(DIRECTORY ${ARAVIS_DIR}/license/ DESTINATION license)
+# Install aravis library, binaries, includes, and shared files
+# install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/aravis/ DESTINATION install)
+install(DIRECTORY ${ARAVIS_DIR}/include/ DESTINATION include)
+install(DIRECTORY ${ARAVIS_DIR}/bin/ DESTINATION bin)
+install(DIRECTORY ${ARAVIS_DIR}/share/ DESTINATION share)
+install(DIRECTORY ${ARAVIS_DIR}/lib/ DESTINATION lib)
+# install(DIRECTORY ${ARAVIS_DIR}/license/ DESTINATION license)
 
-# # Specify the aravis library and include directories
-# add_library(aravis INTERFACE)
-# add_dependencies(aravis aravis_external aravis_dependencies)
-# target_include_directories(aravis INTERFACE ${ARAVIS_DIR}/include ${ARAVIS_DEP_DIR}/include)
+# Specify the aravis library and include directories
+add_library(aravis INTERFACE)
+add_dependencies(aravis aravis_external aravis_dependencies)
+target_include_directories(aravis INTERFACE ${ARAVIS_DIR}/include ${ARAVIS_DEP_DIR}/include)
 
-# # Install aravis library, binaries, includes, and shared files
-# install(DIRECTORY ${ARAVIS_DEP_DIR}/include/ DESTINATION include)
-# install(DIRECTORY ${ARAVIS_DEP_DIR}/bin/ DESTINATION bin)
-# install(DIRECTORY ${ARAVIS_DEP_DIR}/lib/ DESTINATION lib)
+# Install aravis library, binaries, includes, and shared files
+install(DIRECTORY ${ARAVIS_DEP_DIR}/include/ DESTINATION include)
+install(DIRECTORY ${ARAVIS_DEP_DIR}/bin/ DESTINATION bin)
+install(DIRECTORY ${ARAVIS_DEP_DIR}/lib/ DESTINATION lib)
 
-# file(GLOB_RECURSE license_files ${ARAVIS_DIR}/license/COPYING )
-# # installer\external\aravis\aravis-0.3.1-win64\license\LICENSE
-# message(VERBOSE "ARAVIS Liscence file found: ${license_files}")
+file(GLOB_RECURSE license_files ${ARAVIS_DIR}/license/COPYING )
+# installer\external\aravis\aravis-0.3.1-win64\license\LICENSE
+message(VERBOSE "ARAVIS Liscence file found: ${license_files}")
 
-# set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
+set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
 
-# # Copy and concatenate license files
-# file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
+# Copy and concatenate license files
+file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
 
-# foreach(license ${license_files})
-#     message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
-#     file(READ ${license} license_content)
-#     file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
-# endforeach()
+foreach(license ${license_files})
+    message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
+    file(READ ${license} license_content)
+    file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
+endforeach()
 
     

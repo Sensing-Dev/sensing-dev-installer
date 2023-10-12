@@ -3,7 +3,7 @@ include(ExternalProject)
 
 # Define variables
 set(ION_KIT_NAME "ion_kit")
-set(ION_KIT_ACTION "build") # You can set this to a specific action or leave it empty
+set(ION_KIT_ACTION "download") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
@@ -23,23 +23,13 @@ string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
 
 # Set the variables
 list(GET OUTPUT_LIST 0 ION_KIT_NAME)
-list(GET OUTPUT_LIST 1 ION_KIT_SOURCE)
-list(GET OUTPUT_LIST 2 ION_KIT_INSTALL)
 list(GET OUTPUT_LIST 3 ION_KIT_ACTION)
-list(GET OUTPUT_LIST 4 ION_KIT_PKG_URL)
-list(GET OUTPUT_LIST 5 ION_KIT_PKG_SHA)
-list(GET OUTPUT_LIST 6 ION_KIT_GIT_REPO)
 list(GET OUTPUT_LIST 7 ION_KIT_VERSION)
 
 
 # Print to verify
 message("ION_KIT_NAME  ${ION_KIT_NAME}")
-message("ION_KIT_SOURCE : ${ION_KIT_SOURCE}")
-message("ION_KIT_INSTALL: ${ION_KIT_INSTALL}")
 message("ION_KIT_ACTION : ${ION_KIT_ACTION}")
-message("ION_KIT_PKG_URL: ${ION_KIT_PKG_URL}")
-message("ION_KIT_PKG_SHA : ${ION_KIT_PKG_SHA}")
-message("ION_KIT_GIT_REPO: ${ION_KIT_GIT_REPO}")
 message("ION_KIT_VERSION: ${ION_KIT_VERSION}")
 
 
@@ -48,9 +38,25 @@ set(ION_KIT_OS_FILE ion-kit-${ION_KIT_VERSION})
 set(ION_KIT_DIR ${CMAKE_BINARY_DIR}/external/ion-kit/src/${ION_KIT_OS_FILE})
 
 if(ION_KIT_ACTION STREQUAL "build")
-    message(STATUS "Case for value1")
+
+    list(GET OUTPUT_LIST 1 ION_KIT_SOURCE)
+    list(GET OUTPUT_LIST 2 ION_KIT_INSTALL)
+
+    list(GET OUTPUT_LIST 6 ION_KIT_GIT_REPO)
+
+    message("ION_KIT_SOURCE : ${ION_KIT_SOURCE}")
+    message("ION_KIT_INSTALL: ${ION_KIT_INSTALL}")
+    message("ION_KIT_PKG_URL: ${ION_KIT_PKG_URL}")
+
+    message(FATAL_ERROR "Option Unimplemented")
 elseif(ION_KIT_ACTION STREQUAL "download")
     # # Add aravis external project
+    list(GET OUTPUT_LIST 4 ION_KIT_PKG_URL)
+    list(GET OUTPUT_LIST 5 ION_KIT_PKG_SHA)
+    
+    message("ION_KIT_PKG_SHA : ${ION_KIT_PKG_SHA}")
+    message("ION_KIT_GIT_REPO: ${ION_KIT_GIT_REPO}")
+    
     ExternalProject_Add(
         ion-kit_external
         PREFIX ${CMAKE_BINARY_DIR}/external/ion-kit
@@ -67,9 +73,9 @@ elseif(ION_KIT_ACTION STREQUAL "download")
         BUILD_ALWAYS FALSE  # Adjust this according to your needs
     )    
 elseif(ION_KIT_ACTION STREQUAL "use_existing")
-    message(STATUS "Case for value3")
+    message(FATAL_ERROR "Option Unimplemented")
 else()
-    message(STATUS "Default case")
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
 endif()
 
 # Add ion-kit external project

@@ -4,14 +4,12 @@ libraries:
     src_path: aravis
     install_path: install/aravis
     action: build # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip"
+    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25-patched-0fec828.zip"
     # pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-{version}.zip"
-    pkg_sha: "f18462e10006c05779854ebf59f97906762d70b2fc90225669ec7e140969adb3"
+    pkg_sha: "233bcac1f50fbd2aea6f9572171a77e0655386709a7813ef993b05e3168c6e8f"
     git_repo: "https://github.com/AravisProject/aravis.git"
     version: "0.8.25"
-    # patches:
-    #   - patch_path: aravis/patches/*.patch
-
+    
   pygobject:
     name: pygobject
     src_path: pygobject
@@ -22,19 +20,17 @@ libraries:
     pkg_sha: "eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037"
     git_repo: "https://gitlab.gnome.org/GNOME/pygobject.git"
     version: "3.42.2"
-    # patch_path: pyobject/patches
 
   ion_kit:
     name: ion-kit
     src_path: ion-kit
     install_path: install/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v0.3.4/ion-kit-0.3.4-win64.zip"
+    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/ion-kit-0.3.4-win64-patched-a977ada.zip"
     # pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v{version}/ion-kit-{version}-win64.zip"
-    pkg_sha: "3d6edc0ad63f07e54a9d5c10d672b1e48154aa4deb374eb5ecc66d40bcef32b1"
+    pkg_sha: "6b95ab18a4f0cff8fd124aaeb91937dc844ed912586c0d56cfd7b00adafc3a04"
     git_repo: "https://github.com/fixstars/ion-kit.git"
     version: "0.3.4"
-    # patch_path: ion-kit/patches
 
   opencv:
     name: opencv
@@ -46,4 +42,3 @@ libraries:
     pkg_sha: "cac31973cd1c59bfe9dc926acbde815553d23662ea355e0414b5e50d8f8aa5a8"
     git_repo: ""
     version: "4.5.5"
-    # patch_path: opencv/patches

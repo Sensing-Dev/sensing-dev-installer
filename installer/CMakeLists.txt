@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 message(STATUS "Building with CMake version: ${CMAKE_VERSION}")
 
+if(WIN32)
+else()
+    message(FATAL_ERROR "Unsupported operating system")
+endif()
+
 # Load the CMake ExternalProject module
 include(ExternalProject)
 add_subdirectory(external)

@@ -20,10 +20,6 @@ def main():
     desired_action = args.action
     config_path = args.config_path
 
-    # print(f"library_name : {library_name}")
-    # print(f"desired_action : {desired_action}")
-    # print(f"config_path : {config_path}")
-
     with open(config_path, 'r') as file:
         # print(f"file : {file}")
         config = yaml.safe_load(file)
