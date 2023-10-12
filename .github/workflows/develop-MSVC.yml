@@ -100,6 +100,7 @@ jobs:
     - name: Build Aravis using meson
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
+        ls build
         echo "::group::virtualenv"
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
