@@ -13,7 +13,7 @@ Path of installation.
 Runs the script with the default installPath set to the parent directory.
 
 .EXAMPLE
-.\YourScript.ps1 -InputPath "C:\example"
+.\Env.ps1 -installPath "C:\example"
 Runs the script with the installPath set to "C:\example".
 
 .NOTES
@@ -23,6 +23,14 @@ Prerequisite   : PowerShell V3
 param(
     [string]$installPath= (Split-Path $PSScriptRoot -Parent)    
 )
+
+$currentSensingDevRoot = [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
+# Check if SENSING_DEV_ROOT is set and is different from the provided installPath
+if (![string]::IsNullOrEmpty($currentSensingDevRoot) -and $currentSensingDevRoot -ne $installPath) {
+    Write-Host "Unsetting current SENSING_DEV_ROOT: $currentSensingDevRoot"
+    & $PSScriptRoot\unsetEnv.ps1 -installPath $currentSensingDevRoot
+}
+
 
 # Define the paths you want to add
 $newPath = "${installPath}\bin"
