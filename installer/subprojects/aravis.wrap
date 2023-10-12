@@ -1,0 +1,6 @@
+[wrap-git]
+directory=aravis
+url=https://github.com/AravisProject/aravis.git
+push-url=git@https://github.com/AravisProject/aravis.git
+revision=0.8.25
+depth=1
