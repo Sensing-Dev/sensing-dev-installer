@@ -41,26 +41,8 @@ jobs:
 
     steps:
     # --- Setup Environment ---
-
-    - name: Disable Perl And MinGW
-      run: |
-        choco uninstall mingw strawberryperl
-        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Conan via pip
-      run: python -m pip install conan
-
-
-    # --- Clone and Prepare Source ---
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-          submodules: recursive
+    - name: Reuse Common Workflow
+      uses: .github/workflows/Windows-Settings.yml
 
     # --- Download pkg ---
     - name: Download pygobject ZIP file
