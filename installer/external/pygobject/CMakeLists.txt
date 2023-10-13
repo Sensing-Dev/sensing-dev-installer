@@ -2,8 +2,9 @@ include(ExternalProject)
 
 # Define variables
 set(PYGOBJECT_NAME "pygobject")
-set(PYGOBJECT_ACTION "download") # You can set this to a specific action or leave it empty
+set(PYGOBJECT_ACTION "download" CACHE STRING "pygobject action [build, download, use_existing")
 
+message("PYGOBJECT_ACTION : ${PYGOBJECT_ACTION}")
 # Call the Python script and capture its output
 execute_process(
     COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${PYGOBJECT_NAME} --action ${PYGOBJECT_ACTION} --config-path ${CONFIG_PATH}

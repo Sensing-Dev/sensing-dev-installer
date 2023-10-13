@@ -3,7 +3,7 @@ include(ExternalProject)
 
 # Define variables
 set(ION_KIT_NAME "ion_kit")
-set(ION_KIT_ACTION "download") # You can set this to a specific action or leave it empty
+set(ION_KIT_ACTION "download" CACHE STRING "aravis action [build, download, use_existing") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(

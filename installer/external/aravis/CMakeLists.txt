@@ -2,7 +2,7 @@ include(ExternalProject)
 
 # Define variables
 set(ARAVIS_NAME "aravis")
-set(ARAVIS_ACTION "download") # You can set this to a specific action or leave it empty
+set(ARAVIS_ACTION "download" CACHE STRING "aravis action [build, download, use_existing")
 
 # Call the Python script and capture its output
 execute_process(
@@ -36,7 +36,7 @@ set(ARAVIS_DIR ${CMAKE_BINARY_DIR}/external/aravis/src/aravis)
 
 # Define variables
 set(ARAVIS_DEP_NAME "aravis_dep")
-set(ARAVIS_DEP_ACTION "download") # You can set this to a specific action or leave it empty
+set(ARAVIS_DEP_ACTION "download" CACHE STRING "aravis dependencies action [build, download, use_existing") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
