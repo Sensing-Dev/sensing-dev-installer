@@ -82,28 +82,30 @@ jobs:
                   ${{ env.ARAVIS_GIT_REPO }} `
                   ${{ env.ARAVIS_REPO_PATH }}
 
-  #     # --- Dependency Management ---
-  #   - name: Get dependencies using Conan
-  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
-  #     run: |
-  #       echo "::group::conan"
-  #       conan profile detect
-  #       conan install .. -b missing -pr ..\conan_profile -of .
-  #       echo "::endgroup::"
+      # --- Dependency Management ---
+    - name: Get dependencies using Conan
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
+      run: |
+        echo "::group::conan"
+        conan profile detect
+        conan install .. -b missing -pr ..\conan_profile -of .
+        echo "::endgroup::"
 
-  #    # --- Build with MSVC ---
-  #   - name: Setup MSVC Developer Command Prompt
-  #     uses: TheMrMilchmann/setup-msvc-dev@v3
-  #     with:
-  #       arch: x64
-  #   - name: Build Aravis using meson
-  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
-  #     run: |
-  #       ls build
-  #       echo "::group::virtualenv"
-  #       .\build\generators\conanbuild.ps1
-  #       .\build\generators\conanrun.ps1
-  #       echo "::endgroup::"
+     # --- Build with MSVC ---
+    - name: Setup MSVC Developer Command Prompt
+      uses: TheMrMilchmann/setup-msvc-dev@v3
+      with:
+        arch: x64
+    - name: Build Aravis using meson
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
+      run: |
+        echo "::group::virtualenv"
+        ls build
+        .\build\generators\conanbuild.ps1
+        .\build\generators\conanrun.ps1
+        $env:PATH
+        $env:PKG_CONFIG_PATH
+        echo "::endgroup::"
 
 
   #       echo "::group::configure"
