@@ -100,6 +100,7 @@ jobs:
         echo "::endgroup::"
 
     - name: Create Zip Archive
+      working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         # Create a zip archive of aravis-dependencies.       
         Compress-Archive -Path .\build -DestinationPath aravis_dependencies.zip
@@ -108,7 +109,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: aravis_dependencies-artifact
-        path: ./aravis_dependencies.zip
+        path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_dependencies.zip
 
      # --- Build with MSVC ---
     - name: Setup MSVC Developer Command Prompt
@@ -280,16 +281,16 @@ jobs:
           path: |
             ${{ env.BUILD_PATH}}/*.zip
 
-  # test:
-  #   needs: build
-  #   runs-on: windows-latest
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v2
-  #     with:
-  #       submodules: recursive
-  #   - name: Run tests
-  #     working-directory: installer
-  #     run: |
-  #       .\tools\Env.ps1
-  #       python .\tests\sensing_dev_test.py
+  test:
+    needs: build
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Run tests
+      working-directory: installer
+      run: |
+        .\tools\Env.ps1
+        python .\tests\sensing_dev_test.py
