@@ -30,7 +30,7 @@ env:
 jobs:
 
   aravis:
-    runs-on: windows-2019
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
@@ -163,7 +163,7 @@ jobs:
 
     - name: Run CMake
       working-directory: ${{ env.BUILD_PATH}}
-      run: cmake -G "Visual Studio 16 2019" `
+      run: cmake -G "Visual Studio 17 2022" `
               -D ARAVIS_ACTION="use_existing" `
               -D ARAVIS_DEP_ACTION="use_existing" `
               -D PYGOBJECT_ACTION="use_existing" `

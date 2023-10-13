@@ -5,7 +5,7 @@ compiler=msvc
 compiler.cppstd=14
 compiler.runtime=dynamic
 compiler.runtime_type=Release
-compiler.version=192
+compiler.version=193
 os=Windows
 
 [conf]
