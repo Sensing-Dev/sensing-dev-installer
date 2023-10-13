@@ -1,8 +1,8 @@
 libraries:
   aravis:
     name: aravis
-    src_path: installer/aravis
-    install_path: installer/dependencies/aravis
+    src_path: aravis # All paths are relative to CMAKE_SOURCE_DIR
+    install_path: dependencies/aravis
     action: build # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip"
     pkg_sha: "f18462e10006c05779854ebf59f97906762d70b2fc90225669ec7e140969adb3"
@@ -11,8 +11,8 @@ libraries:
 
   aravis_dep:
     name: aravis-dependencies
-    src_path: installer/aravis_dep
-    install_path: installer/dependencies/aravis_dependencies
+    src_path: aravis_dep
+    install_path: dependencies/aravis_dependencies
     action: build # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-dependencies.zip"
     pkg_sha: "c0b26fc0c0d2fde51f13107b450c66808ee88d15c2adb0a1f6d4b473f282c3a9"
@@ -21,8 +21,8 @@ libraries:
 
   pygobject:
     name: pygobject
-    src_path: installer/pygobject
-    install_path: installer/dependencies/pygobject
+    src_path: pygobject
+    install_path: dependencies/pygobject
     action: download # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip"
     pkg_sha: "eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037"
@@ -31,8 +31,8 @@ libraries:
 
   ion_kit:
     name: ion-kit
-    src_path: installer/ion-kit
-    install_path: installer/dependencies/ion-kit
+    src_path: ion-kit
+    install_path: dependencies/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v0.3.4/ion-kit-0.3.4-win64.zip"
     pkg_sha: "3d6edc0ad63f07e54a9d5c10d672b1e48154aa4deb374eb5ecc66d40bcef32b1"
@@ -41,8 +41,8 @@ libraries:
 
   opencv:
     name: opencv
-    src_path: installer/opencv
-    install_path: installer/dependencies/opencv
+    src_path: opencv
+    install_path: dependencies/opencv
     action: download # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://github.com/opencv/opencv/releases/download/4.5.5/opencv-4.5.5-vc14_vc15.exe"
     pkg_sha: "cac31973cd1c59bfe9dc926acbde815553d23662ea355e0414b5e50d8f8aa5a8"
