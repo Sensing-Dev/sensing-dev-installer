@@ -3,6 +3,7 @@ name: Sensing dev installer Build, Test
 on:
   push:
     branches:
+      #     - '*'  # This will run the build and test jobs for pull requests to all branches
       - 'feature/8-build-aravis-in-workflow'  # This will run the build and test jobs for every push on all branches
 
   # pull_request:
@@ -160,9 +161,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
+      - name: Set up Python and Install Conan via pip
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10.4"
+      - run: python -m pip install conan
+
+      - name: Disable Perl (remove from PATH)
+        run: echo "C:\Strawberry\perl" | Out-Null
+
+      - name: Install WiX Toolset
+        run: choco install wixtoolset -y
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
           submodules: recursive
     - name: Disable Perl And MinGW
       run: |

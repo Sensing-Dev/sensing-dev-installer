@@ -3,13 +3,13 @@
 Script for downloading and installing Sensing SDK-installer
 
 .DESCRIPTION
-Downloads and install zip or msi of given version or latest version
+Downloads and install zip or msi of the given version or the latest version
 
 .PARAMETER version
 Specifies the version. The default is 'latest'.
 
 .PARAMETER user
-Specifies the user name. Use this to install installer at users's LOCALAPPDATA
+Specifies the user name. Use this to install the installer at users' LOCALAPPDATA
 
 .PARAMETER Url
 Installer URL to be used by the script or function.
@@ -43,7 +43,7 @@ if ( -not $installPath) {
         $UserProfilePath = "C:\Users\$user"
         $installPath = Join-Path -Path $UserProfilePath -ChildPath "AppData\Local"
     } else {
-        # If no username is provided, use the LOCALAPPDATA of the currently logged in user
+        # If no username is provided, use the LOCALAPPDATA of the currently logged-in user
         $installPath = "$env:LOCALAPPDATA"
     }
 }
@@ -67,10 +67,8 @@ if (-not $Url ) {
     $msiUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-win64.msi"
 
     if ($user) {
-        # If a username is provided, get that user's LOCALAPPDATA path
         $Url = "$zipUrl"
     } else {
-        # If no username is provided, use the LOCALAPPDATA of the currently logged in user
         $Url = "$msiUrl"
     }   
 }
@@ -94,7 +92,12 @@ if ($Url.EndsWith("zip")) {
         Get-ChildItem -Path $tempExtractionPath
         # If extraction is successful, replace the old contents with the new
         $installPath = "$installPath\$installerName"
-        Get-ChildItem -Path $installPath -Recurse | Remove-Item -Force -Recurse
+        if (Test-Path -Path ${installPath}){
+            Get-ChildItem -Path $installPath -Recurse | Remove-Item -Force -Recurse
+        }
+        else{
+            New-Item -Path $installPath -ItemType Directory
+        }
         Move-Item -Path "$tempExtractionPath\${installerName}-${versionNum}-win64\*" -Destination $installPath -Force
         
         # Cleanup the temporary extraction directory
