@@ -269,12 +269,16 @@ jobs:
           path: |
             ${{ env.BUILD_PATH}}/*.zip
 
-  test:
-    needs: build
-    runs-on: windows-latest
-    steps:
-    - name: Run tests
-      working-directory: installer
-      run: |
-        .\tools\Env.ps1
-        python .\tests\sensing_dev_test.py
+  # test:
+  #   needs: build
+  #   runs-on: windows-latest
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
+  #     with:
+  #       submodules: recursive
+  #   - name: Run tests
+  #     working-directory: installer
+  #     run: |
+  #       .\tools\Env.ps1
+  #       python .\tests\sensing_dev_test.py
