@@ -79,12 +79,12 @@ jobs:
   #       key: aravis-${{ matrix.aravis_version }}
   #       restore-keys: |
   #         aravis-
-  #   - name: Clone and checkout specific tag of Aravis
-  #     run: |
-  #       git clone --depth 1 `
-  #                 -b "${{ matrix.aravis_version }}" `
-  #                 ${{ env.ARAVIS_GIT_REPO }} `
-  #                 ${{ env.ARAVIS_REPO_PATH }}
+    - name: Clone and checkout specific tag of Aravis
+      run: |
+        git clone --depth 1 `
+                  -b "${{ matrix.aravis_version }}" `
+                  ${{ env.ARAVIS_GIT_REPO }} `
+                  ${{ env.ARAVIS_REPO_PATH }}
 
   #     # --- Dependency Management ---
   #   - name: Get dependencies using Conan
