@@ -163,7 +163,7 @@ jobs:
 
     - name: Run CMake
       working-directory: ${{ env.BUILD_PATH}}
-      run: cmake -G "Visual Studio 17 2022" `
+      run: cmake -G "Visual Studio 16 2019" `
               -D ARAVIS_ACTION="use_existing" `
               -D ARAVIS_DEP_ACTION="use_existing" `
               -D PYGOBJECT_ACTION="use_existing" `
