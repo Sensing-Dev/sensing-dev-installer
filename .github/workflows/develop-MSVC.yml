@@ -18,8 +18,11 @@ env:
   PYGOBJECT_GIT_REPO: https://github.com/Sensing-Dev/pygobject.git
   PYGOBJECT_PKG_URL: https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
   PYGOBJECT_PKG_SHA: 'eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037'
+  PYGOBJECT_INSTALL_PATH: installer/dependencies/pygobject-3.42.2
   ARAVIS_REPO_PATH: installer/aravis
   ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
+  ARAVIS_INSTALL_PATH: installer/dependencies/aravis
+  DEPENDENCIES_DIR: installer/dependencies
   BUILD_PATH: installer/build
 
 
@@ -58,15 +61,16 @@ jobs:
       with:
         submodules: recursive
 
-    # --- Download pkg ---
+     # --- Dependency Management ---
+    - run: mkdir ${{ env.DEPENDENCIES_DIR}}
     - name: Download pygobject ZIP file
       run: |
         Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
 
     - name: Unzip the pygobject file
       run: |
-        Expand-Archive -Path pygobject.zip -DestinationPath ./installer
-        ls ./${{ env.PYGOBJECT_REPO_PATH }}
+        Expand-Archive -Path pygobject.zip -DestinationPath ./${{ env.DEPENDENCIES_DIR }}
+        ls ./${{ env.PYGOBJECT_INSTALL_PATH }}
         
 
 
@@ -84,7 +88,7 @@ jobs:
                   ${{ env.ARAVIS_GIT_REPO }} `
                   ${{ env.ARAVIS_REPO_PATH }}
 
-      # --- Dependency Management ---
+     
     - name: Get dependencies using Conan
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
@@ -98,6 +102,7 @@ jobs:
       uses: TheMrMilchmann/setup-msvc-dev@v3
       with:
         arch: x64
+
     - name: Build Aravis using meson
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
@@ -105,8 +110,8 @@ jobs:
         ls build
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
-        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH"
-        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
+        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\bin;$env:PATH"
+        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
         $env:PATH
         $env:PKG_CONFIG_PATH
         echo "::endgroup::"
@@ -114,9 +119,9 @@ jobs:
 
         echo "::group::configure"
         meson setup `
-          --prefix ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\install `
+          --prefix ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}} `
           --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\pygobject\generators;${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig `
+          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\lib\pkgconfig `
           -Ddocumentation=disabled `
           -Dgst-plugin=${{ matrix.gst_plugin }} `
           -Dintrospection=${{ matrix.introspection }} `
