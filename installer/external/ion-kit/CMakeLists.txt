@@ -41,7 +41,6 @@ if(ION_KIT_ACTION STREQUAL "build")
 
     list(GET OUTPUT_LIST 1 ION_KIT_SOURCE)
     list(GET OUTPUT_LIST 2 ION_KIT_INSTALL)
-
     list(GET OUTPUT_LIST 6 ION_KIT_GIT_REPO)
 
     message("ION_KIT_SOURCE : ${ION_KIT_SOURCE}")
@@ -50,7 +49,7 @@ if(ION_KIT_ACTION STREQUAL "build")
 
     message(FATAL_ERROR "Option Unimplemented")
 elseif(ION_KIT_ACTION STREQUAL "download")
-    # # Add aravis external project
+    # Add ion-kit external project
     list(GET OUTPUT_LIST 4 ION_KIT_PKG_URL)
     list(GET OUTPUT_LIST 5 ION_KIT_PKG_SHA)
     
@@ -75,7 +74,7 @@ elseif(ION_KIT_ACTION STREQUAL "download")
 elseif(ION_KIT_ACTION STREQUAL "use_existing")
     message(FATAL_ERROR "Option Unimplemented")
 else()
-    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()
 
 # Add ion-kit external project

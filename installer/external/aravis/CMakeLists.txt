@@ -38,43 +38,8 @@ set(ARAVIS_DIR ${CMAKE_BINARY_DIR}/external/aravis/src/aravis)
 if(ARAVIS_ACTION STREQUAL "build")
 
     list(GET OUTPUT_LIST 6 ARAVIS_GIT_REPO)
-
     message("ARAVIS_GIT_REPO: ${ARAVIS_GIT_REPO}")
-    
-    FetchContent_Declare(
-        aravis
-        GIT_REPOSITORY ${ARAVIS_GIT_REPO}
-        GIT_TAG        ${ARAVIS_VERSION}
-    )
-    FetchContent_MakeAvailable(aravis)
-    if(NOT aravis_POPULATED)
-        FetchContent_Populate(aravis)
-    endif()
-
-    # Create a build directory for aravis within the populated content
-    set(ARAVIS_BUILD_DIR ${aravis_BINARY_DIR}/_build)
-    set(ARAVIS_INSTALL_DIR ${aravis_BINARY_DIR}/_install)
-
     message(FATAL_ERROR "Option Unimplemented")
-
-    # Configure the project using Meson
-    string(TOLOWER ${CMAKE_BUILD_TYPE} MESON_BUILD_TYPE)
-    execute_process(
-    COMMAND meson setup --prefix ${ARAVIS_INSTALL_DIR} --buildtype ${MESON_BUILD_TYPE} ${ARAVIS_BUILD_DIR} ${aravis_SOURCE_DIR} 
-    RESULT_VARIABLE result
-    )
-    if(result)
-        message(FATAL_ERROR "Failed to configure aravis with meson")
-    endif()
-
-    # Now build it using Ninja (assuming you're using the Ninja backend with Meson)
-    execute_process(
-        COMMAND ninja -C ${ARAVIS_BUILD_DIR} --prefix
-        RESULT_VARIABLE result
-    )
-    if(result)
-        message(FATAL_ERROR "Failed to build aravis with ninja")
-    endif()
 
 elseif(ARAVIS_ACTION STREQUAL "download")
     list(GET OUTPUT_LIST 4 ARAVIS_PKG_URL)
@@ -105,7 +70,7 @@ elseif(ARAVIS_ACTION STREQUAL "use_existing")
     message("ARAVIS_INSTALL: ${ARAVIS_INSTALL}")
     message(FATAL_ERROR "Option Unimplemented")
 else()
-    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()
 
 set(ARAVIS_DEP_DIR "${CMAKE_BINARY_DIR}/external/aravis_dependencies/src/aravis_dep")

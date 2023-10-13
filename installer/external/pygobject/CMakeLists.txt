@@ -71,7 +71,7 @@ elseif(PYGOBJECT_ACTION STREQUAL "download")
 elseif(PYGOBJECT_ACTION STREQUAL "use_existing")
     message(FATAL_ERROR "Option Unimplemented")
 else()
-    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()
 
 # Specify the pygobject library and include directories
