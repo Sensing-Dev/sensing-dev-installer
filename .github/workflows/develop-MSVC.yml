@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python and Install Conan via pip
         uses: actions/setup-python@v2
         with:
-           python-version: "3.11.4"
+         python-version: "3.11.4"
       - run: python -m pip install conan
       - run: python -m pip install PyYAML
 

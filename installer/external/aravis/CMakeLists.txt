@@ -1,43 +1,77 @@
 include(ExternalProject)
 
-# Define aravis version
-set(ARAVIS_VERSION 0.8.25)
+# Define variables
+set(ARAVIS_NAME "aravis")
+set(ARAVIS_ACTION "download") # You can set this to a specific action or leave it empty
 
-# Set URLs for Windows and Linux
-	#https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip
-set(ARAVIS_WIN_URL "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip")
-set(ARAVIS_WIN_URL_HASH "f18462e10006c05779854ebf59f97906762d70b2fc90225669ec7e140969adb3")
+# Call the Python script and capture its output
+execute_process(
+    COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${ARAVIS_NAME} --action ${ARAVIS_ACTION} --config-path ${CONFIG_PATH}
+    OUTPUT_VARIABLE OUTPUT_VALUE
+    RESULTS_VARIABLE  RESULT_CODE
+    ERROR_VARIABLE error
+)
 
-# Determine the operating system
-if(WIN32)
-    set(ARAVIS_OS_URL ${ARAVIS_WIN_URL})
-    set(ARAVIS_OS_HASH ${ARAVIS_WIN_URL_HASH})
-    set(ARAVIS_OS_FILE Aravis-${ARAVIS_VERSION})
-elseif(UNIX)
 
-else()
-    message(FATAL_ERROR "Unsupported operating system")
+if(RESULT_CODE)
+    message(FATAL_ERROR "Error while parsing config: ${OUTPUT_VALUE}")
 endif()
 
+#Split the output into a list
+string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
+
+# Set the variables
+list(GET OUTPUT_LIST 0 ARAVIS_NAME)
+list(GET OUTPUT_LIST 3 ARAVIS_ACTION)
+list(GET OUTPUT_LIST 7 ARAVIS_VERSION)
+
+
+# Print to verify
+message("ARAVIS_NAME  ${ARAVIS_NAME}")
+message("ARAVIS_VERSION: ${ARAVIS_VERSION}")
+
+message("ARAVIS_ACTION : ${ARAVIS_ACTION}")
+
+set(ARAVIS_OS_FILE Aravis-${ARAVIS_VERSION})
 set(ARAVIS_DIR ${CMAKE_BINARY_DIR}/external/aravis/src/aravis)
 
-# Add aravis external project
+if(ARAVIS_ACTION STREQUAL "build")
 
-ExternalProject_Add(
-    aravis_external
-    PREFIX ${CMAKE_BINARY_DIR}/external/aravis
-    URL ${ARAVIS_OS_URL}
-    URL_HASH SHA256=${ARAVIS_OS_HASH}  # Use SHA-256 hash
-    DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/aravis/downloads  # Specify a downloads directory
-    SOURCE_DIR ${ARAVIS_DIR}
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    CONFIGURE_COMMAND ""  # No configure step needed
-    BUILD_COMMAND ""  # No build step needed
-    INSTALL_COMMAND  ""
-    # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${ARAVIS_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/aravis' -Force"
-    BUILD_IN_SOURCE FALSE
-    BUILD_ALWAYS FALSE  # Adjust this according to your needs
-)
+    list(GET OUTPUT_LIST 6 ARAVIS_GIT_REPO)
+    message("ARAVIS_GIT_REPO: ${ARAVIS_GIT_REPO}")
+    message(FATAL_ERROR "Option Unimplemented")
+
+elseif(ARAVIS_ACTION STREQUAL "download")
+    list(GET OUTPUT_LIST 4 ARAVIS_PKG_URL)
+    list(GET OUTPUT_LIST 5 ARAVIS_PKG_SHA)
+    message("ARAVIS_PKG_URL: ${ARAVIS_PKG_URL}")
+    message("ARAVIS_PKG_SHA : ${ARAVIS_PKG_SHA}")
+    # # Add aravis external project
+    ExternalProject_Add(
+        aravis_external
+        PREFIX ${CMAKE_BINARY_DIR}/external/aravis
+        URL ${ARAVIS_PKG_URL}
+        URL_HASH SHA256=${ARAVIS_PKG_SHA}  # Use SHA-256 hash
+        DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/aravis/downloads  # Specify a downloads directory
+        SOURCE_DIR ${ARAVIS_DIR}
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND ""  # No configure step needed
+        BUILD_COMMAND ""  # No build step needed
+        INSTALL_COMMAND  ""
+        # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${ARAVIS_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/aravis' -Force"
+        BUILD_IN_SOURCE FALSE
+        BUILD_ALWAYS FALSE  # Adjust this according to your needs
+        )
+elseif(ARAVIS_ACTION STREQUAL "use_existing")
+
+    list(GET OUTPUT_LIST 1 ARAVIS_SOURCE)
+    list(GET OUTPUT_LIST 2 ARAVIS_INSTALL)
+    message("ARAVIS_SOURCE : ${ARAVIS_SOURCE}")
+    message("ARAVIS_INSTALL: ${ARAVIS_INSTALL}")
+    message(FATAL_ERROR "Option Unimplemented")
+else()
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
+endif()
 
 set(ARAVIS_DEP_DIR "${CMAKE_BINARY_DIR}/external/aravis_dependencies/src/aravis_dep")
 set(ARAVIS_DEP_WIN_URL_HASH "c0b26fc0c0d2fde51f13107b450c66808ee88d15c2adb0a1f6d4b473f282c3a9")
