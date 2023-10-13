@@ -67,8 +67,7 @@ jobs:
       run: |
         Expand-Archive -Path pygobject.zip -DestinationPath ./installer
         ls ./${{ env.PYGOBJECT_REPO_PATH }}
-        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH"
-        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
+        
 
 
   #   - name: Cache Aravis repo
@@ -106,6 +105,8 @@ jobs:
         ls build
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
+        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH"
+        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
         $env:PATH
         $env:PKG_CONFIG_PATH
         echo "::endgroup::"
