@@ -99,6 +99,17 @@ jobs:
         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
         echo "::endgroup::"
 
+    - name: Create Zip Archive
+      run: |
+        # Create a zip archive of aravis-dependencies.       
+        Compress-Archive -Path .\build -DestinationPath aravis_dependencies.zip
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: aravis_dependencies-artifact
+        path: ./aravis_dependencies.zip
+
      # --- Build with MSVC ---
     - name: Setup MSVC Developer Command Prompt
       uses: TheMrMilchmann/setup-msvc-dev@v3
@@ -206,7 +217,7 @@ jobs:
 
 
   build:
-    # needs: aravis
+    needs: aravis
     runs-on: windows-latest
 
     steps:
