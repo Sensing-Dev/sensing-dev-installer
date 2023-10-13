@@ -25,11 +25,13 @@ env:
   ARAVIS_DEP_PATH: installer\dependencies\aravis_dependencies
   DEPENDENCIES_DIR: installer\dependencies
   BUILD_PATH: installer\build
+  CONAN_USER_HOME: "${{ github.workspace }}/release/"
+  CONAN_USER_HOME_SHORT: "${{ github.workspace }}/release/short"
 
 
 jobs:
 
-  aravis:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,10 +71,21 @@ jobs:
     - run: python -m pip install PyYAML
     - run: python -m pip install conan
 
+    - name: Using the builtin GitHub Cache Action for .conan
+      if: matrix.os == 'windows-latest'
+      id: cache-conan
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-conan-modules
+      with:
+        path: ${{ env.CONAN_USER_HOME }}
+        key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('installer/conanfile.py') }}
+        restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
+
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        submodules: recursive
+        submodules: recursive    
 
      # --- Dependency Management ---
     - run: mkdir ${{ env.DEPENDENCIES_DIR}}
@@ -93,6 +106,7 @@ jobs:
   #       key: aravis-${{ matrix.aravis_version }}
   #       restore-keys: |
   #         aravis-
+
     - name: Clone and checkout specific tag of Aravis
       run: |
         git clone --depth 1 `
@@ -100,7 +114,10 @@ jobs:
                   ${{ env.ARAVIS_GIT_REPO }} `
                   ${{ env.ARAVIS_REPO_PATH }}
 
-     
+    - name: Restore Conan Cache
+      if: steps.cache-conan.outputs.cache-hit == 'true' # Check if cache was restored
+      run: echo "Conan cache was restored"
+
     - name: Get dependencies using Conan
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
@@ -110,17 +127,21 @@ jobs:
         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
         echo "::endgroup::"
 
-    - name: Create Zip Archive
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
-      run: |
-        # Create a zip archive of aravis-dependencies.       
-        Compress-Archive -Path .\build -DestinationPath aravis_dependencies.zip
+    - name: Save Conan Cache
+      if: steps.cache-conan.outputs.cache-hit != 'true' # Check if cache was not restored
+      run: echo "Conan cache was saved"
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: aravis_dependencies-artifact
-        path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_dependencies.zip
+    # - name: Create Zip Archive
+    #   working-directory: ${{ env.ARAVIS_REPO_PATH }}
+    #   run: |
+    #     # Create a zip archive of aravis-dependencies.       
+    #     Compress-Archive -Path .\build -DestinationPath aravis_dependencies.zip
+
+    # - name: Upload Artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: aravis_dependencies-artifact
+    #     path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_dependencies.zip
 
      # --- Build with MSVC ---
     - name: Setup MSVC Developer Command Prompt
@@ -215,85 +236,8 @@ jobs:
   #       name: meson-log
   #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
 
-  #   - name: Create ZIP from installed files
-  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
-  #     run: |
-  #       Compress-Archive -Path install\* -DestinationPath Aravis_${{ matrix.aravis_version }}.zip
-
-  #   - name: Upload Aravis ZIP as artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name:  Aravis_${{ matrix.aravis_version }}_zip
-  #       path:  ${{ env.ARAVIS_REPO_PATH }}/Aravis_${{ matrix.aravis_version }}.zip
-
-
-
-  build:
-    needs: aravis
-    runs-on: windows-latest
-
-    steps:
-      - name: Set up Python and Install Conan via pip
-        uses: actions/setup-python@v2
-        with:
-           python-version: "${{ env.PYTHON_VERSION }}"
-      - run: python -m pip install conan
-      - run: python -m pip install PyYAML
-
-      - name: Disable Perl (remove from PATH)
-        run: choco uninstall mingw strawberryperl
-
-      - name: Install WiX Toolset
-        run: choco install wixtoolset -y
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Setup MSVC Developer Command Prompt
-        uses: TheMrMilchmann/setup-msvc-dev@v3
-        with:
-          arch: x64
-
-      - name: Create and enter build directory
-        run: |
-          cd installer
-          mkdir build
-          cd build
-
-      - name: Run CMake
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cmake -G "Visual Studio 17 2022" -A x64 ../
-
-      - name: Build with CMake
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cmake --build . --config Release
-
-      - name: Package with CPack WIX
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cpack -G "WIX"
-
-      - name: Upload artifacts MSI
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-msi
-          path: |
-            ${{ env.BUILD_PATH}}/*.msi
-
-      - name: Create package zip
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cpack -G "ZIP"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-zip
-          path: |
-            ${{ env.BUILD_PATH}}/*.zip
-
   test:
-    needs: build
+    needs: aravis
     runs-on: windows-latest
     steps:
     - name: Checkout repository
