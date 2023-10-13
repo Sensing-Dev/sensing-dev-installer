@@ -69,7 +69,11 @@ elseif(PYGOBJECT_ACTION STREQUAL "download")
     # Add pygobject external project
     
 elseif(PYGOBJECT_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
+    list(GET OUTPUT_LIST 1 PYGOBJECT_SOURCE)
+    list(GET OUTPUT_LIST 2 PYGOBJECT_INSTALL)
+    message("PYGOBJECT_SOURCE : ${PYGOBJECT_SOURCE}")
+    message("PYGOBJECT_INSTALL: ${PYGOBJECT_INSTALL}")
+    set(PYGOBJECT_DIR  ${PYGOBJECT_INSTALL})
 else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()
