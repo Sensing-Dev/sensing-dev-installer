@@ -133,14 +133,14 @@ jobs:
         echo "::endgroup::"
 
 
-  #       echo "::group::compile"
-  #       meson compile -C .\build -v
-  #       echo "::endgroup::"
+        echo "::group::compile"
+        meson compile -C .\build -v
+        echo "::endgroup::"
 
 
-  #       echo "::group::install"
-  #       meson install -C .\build
-  #       echo "::endgroup::"
+        echo "::group::install"
+        meson install -C .\build
+        echo "::endgroup::"
 
   #     continue-on-error: true
 
