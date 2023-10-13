@@ -120,9 +120,9 @@ jobs:
 
         echo "::group::configure"
         meson setup `
-          --prefix ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}} `
+          --prefix "${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}}" `
           --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig `
+          --pkg-config-path "${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig" `
           -Ddocumentation=disabled `
           -Dgst-plugin=${{ matrix.gst_plugin }} `
           -Dintrospection=${{ matrix.introspection }} `
