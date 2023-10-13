@@ -3,7 +3,7 @@ include(ExternalProject)
 
 # Define variables
 set(OPENCV_NAME "opencv")
-set(OPENCV_ACTION "download" CACHE STRING "aravis action [build, download, use_existing") # You can set this to a specific action or leave it empty
+set(OPENCV_ACTION "download" CACHE STRING "opencv action [build, download, use_existing") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
