@@ -14,11 +14,11 @@ on:
 
 env:
   PYTHON_VERSION: '3.11.4'
-  PYGOBJECT_REPO_PATH: installer/pygobject-3.42.2
+  PYGOBJECT_REPO_PATH: installer/pygobject
   PYGOBJECT_GIT_REPO: https://github.com/Sensing-Dev/pygobject.git
   PYGOBJECT_PKG_URL: https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
   PYGOBJECT_PKG_SHA: 'eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037'
-  PYGOBJECT_INSTALL_PATH: installer/dependencies/pygobject-3.42.2
+  PYGOBJECT_INSTALL_PATH: installer/dependencies/pygobject
   ARAVIS_REPO_PATH: installer/aravis
   ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
   ARAVIS_INSTALL_PATH: installer/dependencies/aravis
@@ -36,6 +36,7 @@ jobs:
         include:
         - build_type_meson: release
           aravis_version: "0.8.25"
+          pygobject_version: "3.42.2"
           gst_plugin: "disabled"
           introspection: "enabled"
           usb: "enabled"
@@ -70,7 +71,7 @@ jobs:
     - name: Unzip the pygobject file
       run: |
         Expand-Archive -Path pygobject.zip -DestinationPath ./${{ env.DEPENDENCIES_DIR }}
-        ls ./${{ env.PYGOBJECT_INSTALL_PATH }}
+        ls ./${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}
         
 
 
@@ -110,8 +111,8 @@ jobs:
         ls build
         .\build\generators\conanbuild.ps1
         .\build\generators\conanrun.ps1
-        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\bin;$env:PATH"
-        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
+        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\bin;$env:PATH"
+        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
         $env:PATH
         $env:PKG_CONFIG_PATH
         echo "::endgroup::"
@@ -121,7 +122,7 @@ jobs:
         meson setup `
           --prefix ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}} `
           --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}\lib\pkgconfig `
+          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig `
           -Ddocumentation=disabled `
           -Dgst-plugin=${{ matrix.gst_plugin }} `
           -Dintrospection=${{ matrix.introspection }} `
