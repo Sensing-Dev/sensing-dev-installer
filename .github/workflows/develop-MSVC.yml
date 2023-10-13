@@ -72,163 +72,163 @@ jobs:
         Expand-Archive -Path pygobject.zip -DestinationPath ./installer
         ls ./${{ env.PYGOBJECT_REPO_PATH }}
 
-    - name: Cache Aravis repo
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.ARAVIS_REPO_PATH }}
-        key: aravis-${{ matrix.aravis_version }}
-        restore-keys: |
-          aravis-
-    - name: Clone and checkout specific tag of Aravis
-      run: |
-        git clone --depth 1 `
-                  -b "${{ matrix.aravis_version }}" `
-                  ${{ env.ARAVIS_GIT_REPO }} `
-                  ${{ env.ARAVIS_REPO_PATH }}
+  #   - name: Cache Aravis repo
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: ${{ env.ARAVIS_REPO_PATH }}
+  #       key: aravis-${{ matrix.aravis_version }}
+  #       restore-keys: |
+  #         aravis-
+  #   - name: Clone and checkout specific tag of Aravis
+  #     run: |
+  #       git clone --depth 1 `
+  #                 -b "${{ matrix.aravis_version }}" `
+  #                 ${{ env.ARAVIS_GIT_REPO }} `
+  #                 ${{ env.ARAVIS_REPO_PATH }}
 
-      # --- Dependency Management ---
-    - name: Get dependencies using Conan
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
-      run: |
-        echo "::group::conan"
-        conan profile detect
-        conan install .. -b missing -pr ..\conan_profile -of .
-        echo "::endgroup::"
+  #     # --- Dependency Management ---
+  #   - name: Get dependencies using Conan
+  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
+  #     run: |
+  #       echo "::group::conan"
+  #       conan profile detect
+  #       conan install .. -b missing -pr ..\conan_profile -of .
+  #       echo "::endgroup::"
 
-     # --- Build with MSVC ---
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x64
-    - name: Build Aravis using meson
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
-      run: |
-        ls build
-        echo "::group::virtualenv"
-        .\build\generators\conanbuild.ps1
-        .\build\generators\conanrun.ps1
-        echo "::endgroup::"
-
-
-        echo "::group::configure"
-        $env:PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH
-        $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH
-
-        meson setup `
-          --prefix ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\install `
-          --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\pygobject\generators;${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig `
-          -Ddocumentation=disabled `
-          -Dgst-plugin=${{ matrix.gst_plugin }} `
-          -Dintrospection=${{ matrix.introspection }} `
-          -Dusb=${{ matrix.usb }} `
-          -Dviewer=${{ matrix.viewer }} `
-          -Dgv-n-buffers=${{ matrix.gv_n_buffers }} `
-          . .\build
-        echo "::endgroup::"
+  #    # --- Build with MSVC ---
+  #   - name: Setup MSVC Developer Command Prompt
+  #     uses: TheMrMilchmann/setup-msvc-dev@v3
+  #     with:
+  #       arch: x64
+  #   - name: Build Aravis using meson
+  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
+  #     run: |
+  #       ls build
+  #       echo "::group::virtualenv"
+  #       .\build\generators\conanbuild.ps1
+  #       .\build\generators\conanrun.ps1
+  #       echo "::endgroup::"
 
 
-        echo "::group::compile"
-        meson compile -C .\build -v
-        echo "::endgroup::"
+  #       echo "::group::configure"
+  #       $env:PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH
+  #       $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH
+
+  #       meson setup `
+  #         --prefix ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\install `
+  #         --buildtype ${{ matrix.build_type_meson }} `
+  #         --pkg-config-path ${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\pygobject\generators;${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig `
+  #         -Ddocumentation=disabled `
+  #         -Dgst-plugin=${{ matrix.gst_plugin }} `
+  #         -Dintrospection=${{ matrix.introspection }} `
+  #         -Dusb=${{ matrix.usb }} `
+  #         -Dviewer=${{ matrix.viewer }} `
+  #         -Dgv-n-buffers=${{ matrix.gv_n_buffers }} `
+  #         . .\build
+  #       echo "::endgroup::"
 
 
-        echo "::group::install"
-        meson install -C .\build
-        echo "::endgroup::"
-
-      continue-on-error: true
-
-    - name: Upload meson-log on failure
-      if: failure()  # This step will only run if any of the previous steps failed.
-      uses: actions/upload-artifact@v2
-      with:
-        name: meson-log
-        path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
-
-    - name: Create ZIP from installed files
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
-      run: |
-        Compress-Archive -Path install\* -DestinationPath aravis_${{ matrix.aravis_version }}.zip
-
-    - name: Upload Aravis ZIP as artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name:  aravis_${{ matrix.aravis_version }}_zip
-        path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_${{ matrix.aravis_version }}.zip
+  #       echo "::group::compile"
+  #       meson compile -C .\build -v
+  #       echo "::endgroup::"
 
 
+  #       echo "::group::install"
+  #       meson install -C .\build
+  #       echo "::endgroup::"
 
-  build:
-    needs: aravis
-    runs-on: windows-latest
+  #     continue-on-error: true
 
-    steps:
-      - name: Set up Python and Install Conan via pip
-        uses: actions/setup-python@v2
-        with:
-           python-version: "${{ env.PYTHON_VERSION }}"
-      - run: python -m pip install conan
-      - run: python -m pip install PyYAML
+  #   - name: Upload meson-log on failure
+  #     if: failure()  # This step will only run if any of the previous steps failed.
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: meson-log
+  #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
 
-      - name: Disable Perl (remove from PATH)
-        run: choco uninstall mingw strawberryperl
+  #   - name: Create ZIP from installed files
+  #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
+  #     run: |
+  #       Compress-Archive -Path install\* -DestinationPath aravis_${{ matrix.aravis_version }}.zip
 
-      - name: Install WiX Toolset
-        run: choco install wixtoolset -y
+  #   - name: Upload Aravis ZIP as artifact
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name:  aravis_${{ matrix.aravis_version }}_zip
+  #       path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_${{ matrix.aravis_version }}.zip
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
 
-      - name: Setup MSVC Developer Command Prompt
-        uses: TheMrMilchmann/setup-msvc-dev@v3
-        with:
-          arch: x64
 
-      - name: Create and enter build directory
-        run: |
-          cd installer
-          mkdir build
-          cd build
+  # build:
+  #   needs: aravis
+  #   runs-on: windows-latest
 
-      - name: Run CMake
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cmake -G "Visual Studio 17 2022" -A x64 ../
+  #   steps:
+  #     - name: Set up Python and Install Conan via pip
+  #       uses: actions/setup-python@v2
+  #       with:
+  #          python-version: "${{ env.PYTHON_VERSION }}"
+  #     - run: python -m pip install conan
+  #     - run: python -m pip install PyYAML
 
-      - name: Build with CMake
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cmake --build . --config Release
+  #     - name: Disable Perl (remove from PATH)
+  #       run: choco uninstall mingw strawberryperl
 
-      - name: Package with CPack WIX
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cpack -G "WIX"
+  #     - name: Install WiX Toolset
+  #       run: choco install wixtoolset -y
 
-      - name: Upload artifacts MSI
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-msi
-          path: |
-            ${{ env.BUILD_PATH}}/*.msi
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
 
-      - name: Create package zip
-        working-directory: ${{ env.BUILD_PATH}}
-        run: cpack -G "ZIP"
+  #     - name: Setup MSVC Developer Command Prompt
+  #       uses: TheMrMilchmann/setup-msvc-dev@v3
+  #       with:
+  #         arch: x64
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-zip
-          path: |
-            ${{ env.BUILD_PATH}}/*.zip
+  #     - name: Create and enter build directory
+  #       run: |
+  #         cd installer
+  #         mkdir build
+  #         cd build
 
-  test:
-    needs: build
-    runs-on: windows-latest
-    steps:
-    - name: Run tests
-      working-directory: installer
-      run: |
-        .\tools\Env.ps1
-        python .\tests\sensing_dev_test.py
+  #     - name: Run CMake
+  #       working-directory: ${{ env.BUILD_PATH}}
+  #       run: cmake -G "Visual Studio 17 2022" -A x64 ../
+
+  #     - name: Build with CMake
+  #       working-directory: ${{ env.BUILD_PATH}}
+  #       run: cmake --build . --config Release
+
+  #     - name: Package with CPack WIX
+  #       working-directory: ${{ env.BUILD_PATH}}
+  #       run: cpack -G "WIX"
+
+  #     - name: Upload artifacts MSI
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: sensing-dev-installer-msi
+  #         path: |
+  #           ${{ env.BUILD_PATH}}/*.msi
+
+  #     - name: Create package zip
+  #       working-directory: ${{ env.BUILD_PATH}}
+  #       run: cpack -G "ZIP"
+
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: sensing-dev-installer-zip
+  #         path: |
+  #           ${{ env.BUILD_PATH}}/*.zip
+
+  # test:
+  #   needs: build
+  #   runs-on: windows-latest
+  #   steps:
+  #   - name: Run tests
+  #     working-directory: installer
+  #     run: |
+  #       .\tools\Env.ps1
+  #       python .\tests\sensing_dev_test.py
