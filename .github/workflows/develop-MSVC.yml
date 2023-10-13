@@ -67,6 +67,9 @@ jobs:
       run: |
         Expand-Archive -Path pygobject.zip -DestinationPath ./installer
         ls ./${{ env.PYGOBJECT_REPO_PATH }}
+        $env:PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\bin;$env:PATH
+        $env:PKG_CONFIG_PATH=${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }}\lib\pkgconfig;$env:PKG_CONFIG_PATH
+
 
   #   - name: Cache Aravis repo
   #     uses: actions/cache@v2
@@ -147,13 +150,13 @@ jobs:
   #   - name: Create ZIP from installed files
   #     working-directory: ${{ env.ARAVIS_REPO_PATH }}
   #     run: |
-  #       Compress-Archive -Path install\* -DestinationPath aravis_${{ matrix.aravis_version }}.zip
+  #       Compress-Archive -Path install\* -DestinationPath Aravis_${{ matrix.aravis_version }}.zip
 
   #   - name: Upload Aravis ZIP as artifact
   #     uses: actions/upload-artifact@v2
   #     with:
-  #       name:  aravis_${{ matrix.aravis_version }}_zip
-  #       path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_${{ matrix.aravis_version }}.zip
+  #       name:  Aravis_${{ matrix.aravis_version }}_zip
+  #       path:  ${{ env.ARAVIS_REPO_PATH }}/Aravis_${{ matrix.aravis_version }}.zip
 
 
 
