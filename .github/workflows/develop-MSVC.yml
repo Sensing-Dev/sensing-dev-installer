@@ -30,19 +30,30 @@ env:
 jobs:
 
   aravis:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      # matrix:
+      #   include:
+      #   - build_type_meson: release
+      #     aravis_version: "0.8.25"
+      #     pygobject_version: "3.42.2"
+      #     gst_plugin: "disabled"
+      #     introspection: "enabled"
+      #     usb: "enabled"
+      #     viewer: "disabled"
+      #     gv_n_buffers: 1
+
       matrix:
-        include:
-        - build_type_meson: release
-          aravis_version: "0.8.25"
-          pygobject_version: "3.42.2"
-          gst_plugin: "disabled"
-          introspection: "disabled"
-          usb: "enabled"
-          viewer: "disabled"
-          gv_n_buffers: 1
+        os: [ windows-2019, windows-latest]
+        build_type_meson: [release]
+        aravis_version: ["0.8.25"]
+        pygobject_version: ["3.42.2"]
+        gst_plugin: ["disabled","enabled"]
+        introspection: ["disabled","enabled"]
+        usb: ["disabled","enabled"]
+        viewer: ["disabled","enabled"]
+        gv_n_buffers: [1]
 
     steps:
     # --- Setup Environment ---
