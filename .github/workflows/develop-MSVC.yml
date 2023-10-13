@@ -54,7 +54,7 @@ jobs:
         gst_plugin: ["disabled"]
         introspection: ["disabled","enabled"]
         usb: ["enabled"]
-        viewer: ["disabled","enabled"]
+        viewer: ["disabled"]
         gv_n_buffers: [1]
 
     steps:
@@ -125,6 +125,7 @@ jobs:
         conan profile detect
         conan install .. -b missing -pr ..\conan_profile -of .
         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
+        ls ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }}
         echo "::endgroup::"
 
     - name: Save Conan Cache
