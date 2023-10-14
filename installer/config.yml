@@ -3,9 +3,9 @@ libraries:
     name: aravis
     src_path: aravis # All paths are relative to CMAKE_SOURCE_DIR
     install_path: dependencies/aravis
-    action: build # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25.zip"
-    pkg_sha: "f18462e10006c05779854ebf59f97906762d70b2fc90225669ec7e140969adb3"
+    action: download # can be 'download', 'build', or 'use_existing'
+    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25-patched-0fec828.zip"
+    pkg_sha: "233bcac1f50fbd2aea6f9572171a77e0655386709a7813ef993b05e3168c6e8f"
     git_repo: "https://github.com/AravisProject/aravis.git"
     version: "0.8.25"
 
@@ -34,8 +34,8 @@ libraries:
     src_path: ion-kit
     install_path: dependencies/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v0.3.4/ion-kit-0.3.4-win64.zip"
-    pkg_sha: "3d6edc0ad63f07e54a9d5c10d672b1e48154aa4deb374eb5ecc66d40bcef32b1"
+    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/ion-kit-0.3.4-win64-patched-a977ada.zip"
+    pkg_sha: "6b95ab18a4f0cff8fd124aaeb91937dc844ed912586c0d56cfd7b00adafc3a04"
     git_repo: "https://github.com/fixstars/ion-kit.git"
     version: "0.3.4"
 
