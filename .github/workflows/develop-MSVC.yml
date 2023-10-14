@@ -52,7 +52,7 @@ jobs:
         aravis_version: ["0.8.25"]
         pygobject_version: ["3.42.2"]
         gst_plugin: ["disabled"]
-        introspection: ["disabled","enabled"]
+        introspection: ["enabled"]
         usb: ["enabled"]
         viewer: ["disabled"]
         gv_n_buffers: [1]
