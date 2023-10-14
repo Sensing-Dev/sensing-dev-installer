@@ -124,6 +124,9 @@ jobs:
         echo "::group::conan"
         conan profile detect
         conan install .. -b missing -pr ..\conan_profile -of .
+        echo "::endgroup::"
+
+        echo "::group::move"
         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
         ls ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }}
         echo "::endgroup::"
@@ -159,9 +162,7 @@ jobs:
         .\build\generators\conanrun.ps1
         $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\bin;$env:PATH"
         $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
-        $env:PATH
-        $env:PKG_CONFIG_PATH
-        echo "::endgroup::"
+          echo "::endgroup::"
 
 
         echo "::group::configure"
@@ -186,6 +187,7 @@ jobs:
 
         echo "::group::install"
         meson install -C .\build
+        ls "${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}}"
         echo "::endgroup::"
 
     - name: Create and enter build directory
