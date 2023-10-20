@@ -57,7 +57,7 @@ jobs:
       with:
          python-version: " ${{ env.PYTHON_VERSION }}"
          cache: "pip"
-         cache-dependency-path: installer/requirements.txt
+         cache-dependency-path: **/requirements.txt
          update-environment: true
     
 
