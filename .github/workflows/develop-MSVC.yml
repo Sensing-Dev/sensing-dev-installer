@@ -98,7 +98,7 @@ jobs:
     - name: Checkout Aravis repository
       uses: actions/checkout@v4.1.1
       with:
-        repository:  ${{ env.ARAVIS_GIT_REPO }} 
+        repository:  "AravisProject/aravis"
         ref: "${{ matrix.aravis_version }}"
         path: ${{ env.ARAVIS_REPO_PATH }}
         submodules: recursive    
