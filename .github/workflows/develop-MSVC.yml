@@ -55,11 +55,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4.7.1
       with:
-         python-version: " ${{ env.PYTHON_VERSION }}"
-         cache: "pip"
-         cache-dependency-path: **/requirements.txt
-         update-environment: true
-    
+         python-version: " ${{ env.PYTHON_VERSION }}"    
 
     - name: pip install      
       run:  python -m pip install PyYAML conan
