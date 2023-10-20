@@ -54,7 +54,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            installer/tools/installer.ps1
+            installer/tools/installer*.ps1
             installer/build/*.msi
             installer/build/*.zip
         env:

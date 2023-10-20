@@ -58,7 +58,7 @@ if (-not $Url ) {
         $version = $response.tag_name
         Write-Verbose "Latest version: $version" 
     }
-   if ($version -match 'v(\d+\.\d+\.\d+)-\w+') {
+   if ($version -match 'v(\d+\.\d+\.\d+)(-\w+)?') {
         $versionNum = $matches[1] 
         Write-Output "Installing version: $version" 
    }
