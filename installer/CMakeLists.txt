@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(sensing-dev-installer CXX)
+project(sensing-dev CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 message(STATUS "Building with CMake version: ${CMAKE_VERSION}")

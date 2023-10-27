@@ -34,8 +34,8 @@ libraries:
     src_path: ion-kit
     install_path: dependencies/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/ion-kit-0.3.4-win64-patched-a977ada.zip"
-    pkg_sha: "6b95ab18a4f0cff8fd124aaeb91937dc844ed912586c0d56cfd7b00adafc3a04"
+    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/ion-kit-0.3.4-win64-patched-3fbe59d.zip"
+    pkg_sha: "855befd9c06c03696fd8d8602c3772da05ab724a64adfd4e2ea5f3d9f0ecb095"
     git_repo: "https://github.com/fixstars/ion-kit.git"
     version: "0.3.4"
 
