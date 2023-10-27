@@ -49,7 +49,7 @@ param (
     [string]$repositoryURL="https://gitlab.gnome.org/GNOME/pygobject.git",
 
     [Parameter(Mandatory=$false)]
-    [string]$version=" 3.42.2",
+    [string]$version="3.42.2",
 
     [Parameter(Mandatory=$false)]
     [string]$nativeINI,

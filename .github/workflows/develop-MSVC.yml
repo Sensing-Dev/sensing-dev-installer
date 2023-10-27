@@ -32,11 +32,12 @@ env:
 jobs:
 
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        aravis_version: ["0.8.25"]
+        pygobject_version: ["3.42.2"]
 
     steps:
     # --- Setup Environment ---
