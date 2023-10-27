@@ -20,7 +20,7 @@ class SensingDevInstallerConan(ConanFile):
     }
     dependencies_folder = "dependencies"
 
-    generators = "PkgConfigDeps","VirtualBuildEnv", "VirtualRunEnv","AutotoolsDeps"
+    generators = "PkgConfigDeps","VirtualBuildEnv", "VirtualRunEnv","AutotoolsDeps","CMakeDeps", "CMakeToolchain"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,10 +45,11 @@ class SensingDevInstallerConan(ConanFile):
         pass
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")  
+        self.tool_requires("meson/1.2.3")  
         self.tool_requires("winflexbison/2.5.24")  
         self.tool_requires("m4/1.4.19")  
         self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("pcre2/10.42")
 
     def requirements(self):
         self.requires("glib/2.76.3")
