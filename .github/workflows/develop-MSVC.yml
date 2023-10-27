@@ -31,20 +31,12 @@ env:
 
 jobs:
 
-  aravis:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        build_type_meson: [release]
-        aravis_version: ["0.8.25"]
-        pygobject_version: ["3.42.2"]
-        gst_plugin: ["disabled"]
-        introspection: ["enabled"]
-        usb: ["enabled"]
-        viewer: ["disabled"]
-        gv_n_buffers: [1]
 
     steps:
     # --- Setup Environment ---
@@ -52,6 +44,7 @@ jobs:
       run: |
           choco uninstall strawberryperl
           Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+
     - name: Setup Python
       uses: actions/setup-python@v4.7.1
       with:
@@ -71,30 +64,12 @@ jobs:
         key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('installer/conanfile.py') }}
         restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
 
+# Checkout all repos
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
       with:
         submodules: recursive    
 
-     # --- Dependency Management ---
-    - run: mkdir ${{ env.DEPENDENCIES_DIR}}
-    - name: Download pygobject ZIP file
-      run: |
-        Invoke-WebRequest -Uri ${{ env.PYGOBJECT_PKG_URL }} -OutFile pygobject.zip
-
-    - name: Unzip the pygobject file
-      run: |
-        Expand-Archive -Path pygobject.zip -DestinationPath ./${{ env.DEPENDENCIES_DIR }}
-        ls ./${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}       
-
-
-  #   - name: Cache Aravis repo
-  #     uses: actions/cache@v2
-  #     with:
-  #       path: ${{ env.ARAVIS_REPO_PATH }}
-  #       key: aravis-${{ matrix.aravis_version }}
-  #       restore-keys: |
-  #         aravis-
     - name: Checkout Aravis repository
       uses: actions/checkout@v4.1.1
       with:
@@ -103,16 +78,30 @@ jobs:
         path: ${{ env.ARAVIS_REPO_PATH }}
         submodules: recursive    
     
+    - name: Checkout Aravis repository
+      uses: actions/checkout@v4.1.1
+      with:
+        repository:  "GNOME/pygobject"
+        ref: "${{ matrix.pygobject_version }}"
+        path: ${{ env.PYGOBJECT_REPO_PATH }}
+        submodules: recursive    
+
+    - name: Create and enter build directory
+      run: |
+          cd installer
+          mkdir build
+          cd build
+    
     - name: Restore Conan Cache
       if: steps.cache-conan.outputs.cache-hit == 'true' # Check if cache was restored
       run: echo "Conan cache was restored"
 
     - name: Get dependencies using Conan
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
+      working-directory: installer
       run: |
         echo "::group::conan"
         conan profile detect
-        conan install .. -b missing -pr ..\conan_profile -of .
+        conan install . -b missing -pr .\conan_profile -of .
         echo "::endgroup::"
 
         echo "::group::move"
@@ -122,66 +111,31 @@ jobs:
 
     - name: Save Conan Cache
       if: steps.cache-conan.outputs.cache-hit != 'true' # Check if cache was not restored
-      run: echo "Conan cache was saved"
-
-    # - name: Create Zip Archive
-    #   working-directory: ${{ env.ARAVIS_REPO_PATH }}
-    #   run: |
-    #     # Create a zip archive of aravis-dependencies.       
-    #     Compress-Archive -Path .\build -DestinationPath aravis_dependencies.zip
-
-    # - name: Upload Artifact
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: aravis_dependencies-artifact
-    #     path:  ${{ env.ARAVIS_REPO_PATH }}/aravis_dependencies.zip
-
+      run: echo "Conan cache was saved"    
      # --- Build with MSVC ---
     - name: Setup MSVC Developer Command Prompt
       uses: TheMrMilchmann/setup-msvc-dev@v3.0.0
       with:
         arch: x64
 
-    
+    - name: Build PygObject using meson
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+      run: |
+        .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ env.PYGOBJECT_REPO_PATH }} `
+                       -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
+                       -installDir ${{ env.PYGOBJECT_INSTALL_PATH }} `
+                       -pkgConfigDir ${{ env.BUILD_PATH}}\generators `
+                       -dependenciesDir ${{ env.BUILD_PATH}}\dependencies
+
     - name: Build Aravis using meson
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
-        echo "::group::virtualenv"
-        ls build
-        .\build\generators\conanbuild.ps1
-        .\build\generators\conanrun.ps1
-        $env:PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\bin;$env:PATH"
-        $env:PKG_CONFIG_PATH="${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig;$env:PKG_CONFIG_PATH"
-        echo "::endgroup::"
-
-        echo "::group::configure"
-        meson setup `
-          --prefix "${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}}" `
-          --buildtype ${{ matrix.build_type_meson }} `
-          --pkg-config-path "${{ github.workspace }}\${{ env.ARAVIS_REPO_PATH}}\build\generators;${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}-${{ matrix.pygobject_version }}\lib\pkgconfig" `
-          -Ddocumentation=disabled `
-          -Dgst-plugin=${{ matrix.gst_plugin }} `
-          -Dintrospection=${{ matrix.introspection }} `
-          -Dusb=${{ matrix.usb }} `
-          -Dviewer=${{ matrix.viewer }} `
-          -Dgv-n-buffers=${{ matrix.gv_n_buffers }} `
-          . .\build
-        echo "::endgroup::"
-
-        echo "::group::compile"
-        meson compile -C .\build -v
-        echo "::endgroup::"
-
-        echo "::group::install"
-        meson install -C .\build
-        ls "${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH}}"
-        echo "::endgroup::"
-
-    - name: Create and enter build directory
-      run: |
-          cd installer
-          mkdir build
-          cd build
+        .   ${{ github.workspace }}\installer\tools\build-Aravis.ps1 -sourceDir ${{ env.ARAVIS_REPO_PATH }} `
+                       -nativeINI  ${{ github.workspace }}\installer\external\aravis\aravis_native.ini `
+                       -installDir ${{ env.ARAVIS_INSTALL_PATH }} `
+                       -pkgConfigDir ${{ env.BUILD_PATH}}\generators `
+                       -dependenciesDir ${{ env.BUILD_PATH}}\dependencies `
+                       -pygobjectInstallDir ${{ env.PYGOBJECT_INSTALL_PATH }} `
 
     - name: Run CMake
       working-directory: ${{ env.BUILD_PATH}}
@@ -227,7 +181,7 @@ jobs:
   #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
 
   test:
-    needs: aravis
+    needs: build
     runs-on: windows-latest
     steps:
     - name: Checkout repository

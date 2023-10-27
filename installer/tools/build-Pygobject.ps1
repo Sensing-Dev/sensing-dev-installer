@@ -115,12 +115,17 @@ if (-not (Get-Command "ninja" -ErrorAction SilentlyContinue)) {
 }
 
 if (Test-Path $nativeINI) {
+    $content = Get-Content -Path $nativeINI -Raw
+    $content = $content -replace '@BUILD_ROOT@', $buildDir
+    $iniFilePath="$buildDir\newNative.ini"
+    Set-Content -Path $iniFilePath -Value $content
+
     Write-Output "meson setup $buildDir $sourceDir `
                 --prefix=$installDir `
-                --native-file $nativeINI" 
+                --native-file $iniFilePath" 
     meson setup $buildDir $sourceDir `
                 --prefix=$installDir `
-                --native-file "$nativeINI" 
+                --native-file "$iniFilePath" 
 }
 else {
     # Setup build directory with Meson
