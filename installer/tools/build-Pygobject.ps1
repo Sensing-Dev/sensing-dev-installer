@@ -113,7 +113,9 @@ if (-not (Get-Command "ninja" -ErrorAction SilentlyContinue)) {
     Write-Error "Ninja is not found. Please ensure it's installed and available in PATH."
     exit 1
 }
-
+if (-not (Test-Path $buildDir)){
+    mkdir $buildDir
+}
 if (Test-Path $nativeINI) {
     $content = Get-Content -Path $nativeINI -Raw
     $content = $content -replace '@BUILD_ROOT@', $buildDir
