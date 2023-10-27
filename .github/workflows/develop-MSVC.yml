@@ -129,21 +129,21 @@ jobs:
         $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
         Set-Content -Path $gobjectWrap -Value $content
         echo "::endgroup::"
-        .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ env.PYGOBJECT_REPO_PATH }} `
+        .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }} `
                        -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
-                       -installDir ${{ env.PYGOBJECT_INSTALL_PATH }} `
-                       -pkgConfigDir ${{ env.BUILD_PATH}}\generators `
-                       -dependenciesDir ${{ env.BUILD_PATH}}\dependencies
+                       -installDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
+                       -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+                       -dependenciesDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\dependencies
 
     - name: Build Aravis using meson
       working-directory: ${{ env.ARAVIS_REPO_PATH }}
       run: |
         .   ${{ github.workspace }}\installer\tools\build-Aravis.ps1 -sourceDir ${{ env.ARAVIS_REPO_PATH }} `
                        -nativeINI  ${{ github.workspace }}\installer\external\aravis\aravis_native.ini `
-                       -installDir ${{ env.ARAVIS_INSTALL_PATH }} `
-                       -pkgConfigDir ${{ env.BUILD_PATH}}\generators `
-                       -dependenciesDir ${{ env.BUILD_PATH}}\dependencies `
-                       -pygobjectInstallDir ${{ env.PYGOBJECT_INSTALL_PATH }} `
+                       -installDir ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH }} `
+                       -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+                       -dependenciesDir ${{ github.workspace }}${{ env.BUILD_PATH}}\dependencies `
+                       -pygobjectInstallDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
 
     - name: Run CMake
       working-directory: ${{ env.BUILD_PATH}}
