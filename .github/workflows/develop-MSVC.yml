@@ -38,6 +38,7 @@ jobs:
       matrix:
         aravis_version: ["0.8.25"]
         pygobject_version: ["3.42.2"]
+        gobject_introspection_version: ["1.73.0"]
 
     steps:
     # --- Setup Environment ---
@@ -122,6 +123,12 @@ jobs:
     - name: Build PygObject using meson
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
+        echo "::group::subproject"
+        $gobjectWrap="${{ env.PYGOBJECT_REPO_PATH }}\subprojects\gobject-introspection.wrap"
+        $content = Get-Content -Path $gobjectWrap -Raw
+        $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
+        Set-Content -Path $gobjectWrap -Value $content
+        echo "::endgroup::"
         .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ env.PYGOBJECT_REPO_PATH }} `
                        -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
                        -installDir ${{ env.PYGOBJECT_INSTALL_PATH }} `
