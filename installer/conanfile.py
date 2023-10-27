@@ -15,7 +15,7 @@ class SensingDevInstallerConan(ConanFile):
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
     }
     dependencies_folder = "dependencies"
@@ -29,7 +29,9 @@ class SensingDevInstallerConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["glib*"].shared=True
+            self.options["glib*"].shared=True
+            self.options["gstreamer*"].shared=True
+            self.options["gst-plugins-base*"].shared=True
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 

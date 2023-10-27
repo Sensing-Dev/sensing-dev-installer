@@ -124,7 +124,7 @@ jobs:
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
         echo "::group::subproject"
-        $gobjectWrap="${{ env.PYGOBJECT_REPO_PATH }}\subprojects\gobject-introspection.wrap"
+        $gobjectWrap=".\subprojects\gobject-introspection.wrap"
         $content = Get-Content -Path $gobjectWrap -Raw
         $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
         Set-Content -Path $gobjectWrap -Value $content
