@@ -31,173 +31,252 @@ env:
 
 jobs:
 
-  build:
+  pygobject:
     runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        aravis_version: ["0.8.25"]
         pygobject_version: ["3.42.2"]
-        gobject_introspection_version: ["1.73.0"]
+        glib_version: ["2.78.0"]
+        gobject_introspection_version: ["1.78.0"] #minor.patch should be same as glib
 
     steps:
-    # --- Setup Environment ---
-    - name: Disable Perl And MinGW
-      run: |
-          choco uninstall strawberryperl
-          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-
     - name: Setup Python
       uses: actions/setup-python@v4.7.1
       with:
-         python-version: " ${{ env.PYTHON_VERSION }}"    
+         python-version: " ${{ env.PYTHON_VERSION }}"   
 
     - name: pip install      
-      run:  python -m pip install PyYAML conan
-
-    - name: Using the builtin GitHub Cache Action for .conan
-      if: matrix.os == 'windows-latest'
-      id: cache-conan
-      uses: actions/cache@v3.3.2
-      env:
-        cache-name: cache-conan-modules
-      with:
-        path: ${{ env.CONAN_USER_HOME }}
-        key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('installer/conanfile.py') }}
-        restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
-
-# Checkout all repos
+      run:  python -m pip install PyYAML conan=1.60
+    
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
       with:
-        submodules: recursive    
+        submodules: recursive   
 
-    - name: Checkout Aravis repository
-      uses: actions/checkout@v4.1.1
-      with:
-        repository:  "AravisProject/aravis"
-        ref: "${{ matrix.aravis_version }}"
-        path: ${{ env.ARAVIS_REPO_PATH }}
-        submodules: recursive    
-    
-    - name: Checkout Aravis repository
+    - name: Checkout Pygobject repository
       uses: actions/checkout@v4.1.1
       with:
         repository:  "GNOME/pygobject"
         ref: "${{ matrix.pygobject_version }}"
         path: ${{ env.PYGOBJECT_REPO_PATH }}
-        submodules: recursive    
-
-    - name: Create and enter build directory
-      run: |
-          cd installer
-          mkdir build
-          cd build
-    
-    - name: Restore Conan Cache
-      if: steps.cache-conan.outputs.cache-hit == 'true' # Check if cache was restored
-      run: echo "Conan cache was restored"
+        submodules: recursive  
 
     - name: Get dependencies using Conan
-      working-directory: installer
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
         echo "::group::conan"
         conan profile detect
-        conan install . -b missing -pr .\conan_profile -of .
+        conan install ${{ github.workspace }}\installer\external\pygobject\conanfile.txt -b missing -pr .\conan_profile -if build
         echo "::endgroup::"
 
-        echo "::group::move"
-        Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
-        ls ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }}
-        echo "::endgroup::"
-
-    - name: Save Conan Cache
-      if: steps.cache-conan.outputs.cache-hit != 'true' # Check if cache was not restored
-      run: echo "Conan cache was saved"    
-     # --- Build with MSVC ---
-    - name: Setup MSVC Developer Command Prompt
-      uses: TheMrMilchmann/setup-msvc-dev@v3.0.0
-      with:
-        arch: x64
-
-    - name: Build PygObject using meson
+    - name: Meson build Pygobject
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+      shell: cmd
       run: |
-        echo "::group::subproject"
-        $gobjectWrap=".\subprojects\gobject-introspection.wrap"
-        $content = Get-Content -Path $gobjectWrap -Raw
-        $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
-        Set-Content -Path $gobjectWrap -Value $content
+      
+        echo "::group::env"
+        SET "sourceDir=%CD%"
+        SET "buildDir=%sourceDir%\build"
+        SET "installDir=${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}"
+        SET "pkgConfigDir=%buildDir%"
+        SET "dependenciesDir=%buildDir%\dependencies"
+        CALL .\build\activate.bat
+        CALL .\build\activate_build.bat
+        CALL .\build\activate_run.bat
+        SET "PKG_CONFIG_PATH=%pkgConfigDir%;%PKG_CONFIG_PATH%"
+        SET PKG_CONFIG_PATH
         echo "::endgroup::"
-        .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }} `
-                       -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
-                       -installDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
-                       -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
-                       -dependenciesDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\dependencies
+        echo "::group::setup"
+        meson setup %buildDir% %sourceDir% --prefix=%installDir% --buildtype release -Dpycairo=disabled -Dtests=false --pkg-config-path %PKG_CONFIG_PATH%
+        echo "::endgroup::"
+        echo "::group::build"
+        meson compile -C %buildDir% -v
+        echo "::endgroup::"
+        echo "::group::install"
+        meson install -C %buildDir%
+        echo "::endgroup::"
 
-    - name: Build Aravis using meson
-      working-directory: ${{ env.ARAVIS_REPO_PATH }}
-      run: |
-        .   ${{ github.workspace }}\installer\tools\build-Aravis.ps1 -sourceDir ${{ env.ARAVIS_REPO_PATH }} `
-                       -nativeINI  ${{ github.workspace }}\installer\external\aravis\aravis_native.ini `
-                       -installDir ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH }} `
-                       -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
-                       -dependenciesDir ${{ github.workspace }}${{ env.BUILD_PATH}}\dependencies `
-                       -pygobjectInstallDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
 
-    - name: Run CMake
-      working-directory: ${{ env.BUILD_PATH}}
-      run: cmake -G "Visual Studio 17 2022" `
-              -D ARAVIS_ACTION="use_existing" `
-              -D ARAVIS_DEP_ACTION="use_existing" `
-              -D PYGOBJECT_ACTION="use_existing" `
-              -A x64 ../
 
-    - name: Build with CMake
-      working-directory: ${{ env.BUILD_PATH}}
-      run: cmake --build . --config Release
 
-    - name: Package with CPack WIX
-      working-directory: ${{ env.BUILD_PATH}}
-      run: cpack -G "WIX"
+    
 
-    - name: Upload artifacts MSI
-      uses: actions/upload-artifact@v3
-      with:
-        name: sensing-dev-installer-msi
-        path: |
-          ${{ env.BUILD_PATH}}/*.msi
+#   build:
+#     runs-on: windows-latest
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         aravis_version: ["0.8.25"]
+#         pygobject_version: ["3.42.2"]
+#         glib_version: ["2.78.0"]
+#         gobject_introspection_version: ["1.78.0"] #minor.patch should be same as glib
 
-    - name: Create package zip
-      working-directory: ${{ env.BUILD_PATH}}
-      run: cpack -G "ZIP"
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: sensing-dev-installer-zip
-        path: |
-          ${{ env.BUILD_PATH}}/*.zip
+    
 
-  #     continue-on-error: true
+#     steps:
+#     # --- Setup Environment ---
+#     - name: Disable Perl And MinGW
+#       run: |
+#           choco uninstall strawberryperl
+#           Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
 
-  #   - name: Upload meson-log on failure
-  #     if: failure()  # This step will only run if any of the previous steps failed.
-  #     uses: actions/upload-artifact@v3
-  #     with:
-  #       name: meson-log
-  #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
+#     - name: Setup Python
+#       uses: actions/setup-python@v4.7.1
+#       with:
+#          python-version: " ${{ env.PYTHON_VERSION }}" 
 
-  test:
-    needs: build
-    runs-on: windows-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    - name: Run tests
-      working-directory: installer
-      run: |
-        .\tools\Env.ps1
-        python .\tests\sensing_dev_test.py
+#     - name: pip install      
+#       run:  python -m pip install PyYAML conan=1.60
+
+#     - name: Using the builtin GitHub Cache Action for .conan
+#       if: matrix.os == 'windows-latest'
+#       id: cache-conan
+#       uses: actions/cache@v3.3.2
+#       env:
+#         cache-name: cache-conan-modules
+#       with:
+#         path: ${{ env.CONAN_USER_HOME }}
+#         key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('installer/conanfile.py') }}
+#         restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
+
+# # Checkout all repos
+#     - name: Checkout repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         submodules: recursive    
+
+#     - name: Checkout Aravis repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         repository:  "AravisProject/aravis"
+#         ref: "${{ matrix.aravis_version }}"
+#         path: ${{ env.ARAVIS_REPO_PATH }}
+#         submodules: recursive    
+    
+#     - name: Checkout Aravis repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         repository:  "GNOME/pygobject"
+#         ref: "${{ matrix.pygobject_version }}"
+#         path: ${{ env.PYGOBJECT_REPO_PATH }}
+#         submodules: recursive    
+
+#     - name: Create and enter build directory
+#       run: |
+#           cd installer
+#           mkdir build
+#           cd build
+    
+#     - name: Restore Conan Cache
+#       if: steps.cache-conan.outputs.cache-hit == 'true' # Check if cache was restored
+#       run: echo "Conan cache was restored"
+
+#     - name: Get dependencies using Conan
+#       working-directory: installer
+#       run: |
+#         echo "::group::conan"
+#         conan profile detect
+#         conan install .\conanfile.txt -b missing -pr .\conan_profile -if build
+#         echo "::endgroup::"
+
+#         echo "::group::move"
+#         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
+#         ls ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }}
+#         echo "::endgroup::"
+
+#     - name: Save Conan Cache
+#       if: steps.cache-conan.outputs.cache-hit != 'true' # Check if cache was not restored
+#       run: echo "Conan cache was saved"    
+#      # --- Build with MSVC ---
+#     - name: Setup MSVC Developer Command Prompt
+#       uses: TheMrMilchmann/setup-msvc-dev@v3.0.0
+#       with:
+#         arch: x64
+
+#     - name: Update gobject_introspection_version
+#       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+#       run: |
+#         echo "::group::subproject"
+#         $gobjectWrap=".\subprojects\gobject-introspection.wrap"
+#         $content = Get-Content -Path $gobjectWrap -Raw
+#         $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
+#         Set-Content -Path $gobjectWrap -Value $content
+#         echo "::endgroup::"
+
+#     - name: Build pygobject with meson
+#       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+#       run: | 
+#         .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }} `
+#                        -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
+#                        -installDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
+#                        -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+#                        -dependenciesDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\dependencies
+
+#     - name: Build Aravis using meson
+#       working-directory: ${{ env.ARAVIS_REPO_PATH }}
+#       run: |
+#         .   ${{ github.workspace }}\installer\tools\build-Aravis.ps1 -sourceDir ${{ env.ARAVIS_REPO_PATH }} `
+#                        -nativeINI  ${{ github.workspace }}\installer\external\aravis\aravis_native.ini `
+#                        -installDir ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH }} `
+#                        -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+#                        -dependenciesDir ${{ github.workspace }}${{ env.BUILD_PATH}}\dependencies `
+#                        -pygobjectInstallDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
+
+#     - name: Run CMake
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cmake -G "Visual Studio 17 2022" `
+#               -D ARAVIS_ACTION="use_existing" `
+#               -D ARAVIS_DEP_ACTION="use_existing" `
+#               -D PYGOBJECT_ACTION="use_existing" `
+#               -A x64 ../
+
+#     - name: Build with CMake
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cmake --build . --config Release
+
+#     - name: Package with CPack WIX
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cpack -G "WIX"
+
+#     - name: Upload artifacts MSI
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: sensing-dev-installer-msi
+#         path: |
+#           ${{ env.BUILD_PATH}}/*.msi
+
+#     - name: Create package zip
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cpack -G "ZIP"
+
+#     - name: Upload artifacts
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: sensing-dev-installer-zip
+#         path: |
+#           ${{ env.BUILD_PATH}}/*.zip
+
+#   #     continue-on-error: true
+
+#   #   - name: Upload meson-log on failure
+#   #     if: failure()  # This step will only run if any of the previous steps failed.
+#   #     uses: actions/upload-artifact@v3
+#   #     with:
+#   #       name: meson-log
+#   #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
+
+#   test:
+#     needs: build
+#     runs-on: windows-latest
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v4
+#       with:
+#         submodules: recursive
+#     - name: Run tests
+#       working-directory: installer
+#       run: |
+#         .\tools\Env.ps1
+#         python .\tests\sensing_dev_test.py
