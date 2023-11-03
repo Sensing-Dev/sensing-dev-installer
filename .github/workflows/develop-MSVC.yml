@@ -47,7 +47,7 @@ jobs:
          python-version: " ${{ env.PYTHON_VERSION }}"   
 
     - name: pip install      
-      run:  python -m pip install PyYAML conan=1.60
+      run:  python -m pip install PyYAML conan==1.60
     
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
