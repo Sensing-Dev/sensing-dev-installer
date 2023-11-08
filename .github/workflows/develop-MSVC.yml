@@ -66,7 +66,7 @@ jobs:
       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
       run: |
         echo "::group::conan"
-        conan install ${{ github.workspace }}\installer\external\pygobject\conanfile.txt -b missing -pr .\conan_profile -if build
+        conan install ${{ github.workspace }}\installer\external\pygobject\conanfile.txt -b missing -if build
         echo "::endgroup::"
 
     - name: Meson build Pygobject
