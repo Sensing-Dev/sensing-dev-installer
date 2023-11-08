@@ -94,6 +94,8 @@ jobs:
         echo "::endgroup::"
         echo "::group::install"
         meson install -C %buildDir%
+        dir %buildDir%
+        dir %installDir%
         echo "::endgroup::"
 
 
