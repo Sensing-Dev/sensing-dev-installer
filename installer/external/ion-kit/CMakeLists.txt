@@ -89,7 +89,7 @@ target_include_directories(ion-kit INTERFACE ${ION_KIT_DIR}/include)
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/ion-kit/${ION_KIT_OS_FILE}/ DESTINATION install)
 install(DIRECTORY ${ION_KIT_DIR}/bin/ DESTINATION bin)
 install(DIRECTORY ${ION_KIT_DIR}/include/ DESTINATION include)
-install(DIRECTORY ${ION_KIT_DIR}/share/ DESTINATION share)
+#install(DIRECTORY ${ION_KIT_DIR}/share/ DESTINATION share)
 install(DIRECTORY ${ION_KIT_DIR}/lib/ DESTINATION lib)
 
 # Copy and concatenate license files
