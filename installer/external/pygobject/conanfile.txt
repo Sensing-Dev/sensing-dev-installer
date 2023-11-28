@@ -10,7 +10,7 @@ libusb/1.0.24
 winflexbison/2.5.24
 
 [tool_requires]
-meson/0.60.0
+meson/1.2.0
 pkgconf/1.7.4
 
 [generators]
