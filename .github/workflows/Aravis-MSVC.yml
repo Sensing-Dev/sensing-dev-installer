@@ -1,0 +1,152 @@
+name: Aravis-MSVC
+
+on:
+  push:
+    branches:
+      - 'feature/8-build-aravis-in-workflow'
+  # Uncomment below if you want to trigger the workflow on pull requests
+  # pull_request:
+  #   branches:
+  #     - '*'
+  workflow_dispatch:
+
+env:
+  ARAVIS_PATH: installer/aravis
+  CONAN_VERSION: 1.57.0
+  ARAVIS_REPO: https://github.com/AravisProject/aravis.git
+
+jobs:
+  aravis_msvc:
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: 16
+            arch: x86_64
+            build_type_conan: Release
+            build_type_meson: release
+            aravis_version: "0.8.25"
+
+    steps:
+    # --- Setup Environment ---
+    - name: Setup Conan
+      run: |
+        pip install "conan==${{ env.CONAN_VERSION }}"
+
+    - name: Disable Perl And MinGW
+      run: |
+        choco uninstall mingw strawberryperl
+        choco upgrade git -y
+        Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+
+    # --- Clone and Prepare Source ---
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Shallow Clone and Checkout Aravis Tag
+      run: |
+        git clone --depth 1 `
+                  -b "${{ matrix.aravis_version }}" `
+                  ${{ env.ARAVIS_REPO }} `
+                  ${{ env.ARAVIS_PATH }}
+
+    # --- Dependency Management ---
+    - name: Setup Conan Dependencies
+      working-directory: ${{ env.ARAVIS_PATH }}
+      env:
+        INPUT_CONANFILE: |
+          [requires]
+          libiconv/1.17
+          gstreamer/1.22.3
+          libxml2/2.10.3
+          zlib/1.2.13
+          libusb/1.0.26
+
+          [build_requires]
+          meson/0.59.2
+          pkgconf/1.9.3
+
+          [generators]
+          pkg_config
+          virtualenv
+          virtualbuildenv
+          virtualrunenv
+
+          [options]
+          glib:shared=True
+          gstreamer:shared=True
+          gst-plugins-base:shared=True
+      run: |
+        $Env:INPUT_CONANFILE | Out-File -FilePath conanfile.txt -Encoding utf8
+
+    - name: Cache Conan Packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.conan/data
+        key: ${{ runner.os }}-conan-${{ hashFiles('${{ env.ARAVIS_PATH }}/conanfile.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-conan-
+
+    - name: Install Conan Dependencies
+      working-directory: ${{ env.ARAVIS_PATH }}
+      run: |
+        conan install -s os="Windows" `
+                      -s compiler="Visual Studio" `
+                      -s compiler.version=${{ matrix.version }} `
+                      -s arch=${{ matrix.arch }} `
+                      -s build_type=${{ matrix.build_type_conan }} `
+                      -b missing `
+                      -b cascade `
+                      -if build .
+
+    # --- Build with MSVC ---
+    - name: Setup MSVC Developer Command Prompt
+      uses: TheMrMilchmann/setup-msvc-dev@v3
+      with:
+        arch: x64
+
+    - name: Configure, Compile, and Install with Meson
+      working-directory: ${{ env.ARAVIS_PATH }}
+      run: |
+        .\build\activate.ps1
+        .\build\activate_build.ps1
+        .\build\activate_run.ps1
+
+        echo "::group::configure"
+        meson --prefix ${{ github.workspace }}\install   `
+              --buildtype ${{ matrix.build_type_meson }}  `
+              --pkg-config-path ${{ github.workspace }}\build  `
+              -Ddocumentation=disabled  `
+              -Dgst-plugin=disabled  `
+              -Dintrospection=disabled  `
+              -Dusb=enabled  `
+              -Dviewer=disabled  `
+              -Dgv-n-buffers=1  `
+              . .\build
+        echo "::endgroup::"
+
+        echo "::group::compile"
+        meson compile -C .\build -v
+        echo "::endgroup::"
+
+        echo "::group::install"
+        meson install -C .\build
+        echo "::endgroup::"
+
+    # --- Testing ---
+    - name: Run Tests
+      working-directory: ${{ env.ARAVIS_PATH }}
+      run: |
+        .\build\activate.ps1
+        .\build\activate_build.ps1
+        .\build\activate_run.ps1
+        meson test -C .\build
+
+    # --- Error Handling ---
+    - name: Upload Logs on Failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: msvc_${{ matrix.version }}_${{ matrix.arch }}_${{ matrix.build_type_meson }}_Meson_Testlog
+        path: build/meson-logs/testlog.txt

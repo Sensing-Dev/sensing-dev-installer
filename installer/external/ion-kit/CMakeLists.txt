@@ -3,7 +3,7 @@ include(ExternalProject)
 
 # Define variables
 set(ION_KIT_NAME "ion_kit")
-set(ION_KIT_ACTION "download") # You can set this to a specific action or leave it empty
+set(ION_KIT_ACTION "download" CACHE STRING "ion-kit action [build, download, use_existing") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
@@ -72,7 +72,11 @@ elseif(ION_KIT_ACTION STREQUAL "download")
         BUILD_ALWAYS FALSE  # Adjust this according to your needs
     )    
 elseif(ION_KIT_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
+    list(GET OUTPUT_LIST 1 ION_KIT_SOURCE)
+    list(GET OUTPUT_LIST 2 ION_KIT_INSTALL)
+    message("ION_KIT_SOURCE : ${ION_KIT_SOURCE}")
+    message("ION_KIT_INSTALL: ${ION_KIT_INSTALL}")
+    set(ION_KIT_DIR  ${ION_KIT_INSTALL})
 else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()

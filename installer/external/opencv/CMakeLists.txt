@@ -3,7 +3,7 @@ include(ExternalProject)
 
 # Define variables
 set(OPENCV_NAME "opencv")
-set(OPENCV_ACTION "download") # You can set this to a specific action or leave it empty
+set(OPENCV_ACTION "download" CACHE STRING "opencv action [build, download, use_existing") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
@@ -68,7 +68,11 @@ elseif(OPENCV_ACTION STREQUAL "download")
     )  
     
 elseif(OPENCV_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
+    list(GET OUTPUT_LIST 1 OPENCV_SOURCE)
+    list(GET OUTPUT_LIST 2 OPENCV_INSTALL)
+    message("OPENCV_SOURCE : ${OPENCV_SOURCE}")
+    message("OPENCV_INSTALL: ${OPENCV_INSTALL}")
+set(OPENCV_DIR  ${OPENCV_INSTALL})
 else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
 endif()
