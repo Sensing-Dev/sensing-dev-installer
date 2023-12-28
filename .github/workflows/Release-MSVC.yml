@@ -45,6 +45,10 @@ jobs:
         working-directory: installer/build
         run: cmake --build . --config Release 
 
+      - name: Generate liscence files
+        working-directory: installer/build
+        run: cmake -G "Visual Studio 17 2022" -A x64 ../ 
+
       - name: Create package msi
         working-directory: installer/build
         run: cpack -G "WIX"
