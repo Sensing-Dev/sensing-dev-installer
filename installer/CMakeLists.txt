@@ -4,6 +4,30 @@ set(CMAKE_CXX_STANDARD 17)
 
 message(STATUS "Building with CMake version: ${CMAKE_VERSION}")
 
+set(THIRDPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
+# Define a function to create custom commands and targets for license file concatenation
+function(concatenate_licenses THIRDPARTY_NOTICE_FILE LICENSE_FILES DEPENDENCY_TARGET)
+    # Custom command to concatenate license files
+    add_custom_command(
+        OUTPUT ${THIRDPARTY_NOTICE_FILE}
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/license"
+        COMMAND ${CMAKE_COMMAND} -E echo "--------" > ${THIRDPARTY_NOTICE_FILE}
+        COMMAND ${CMAKE_COMMAND} -E echo_append "Appending license files to ${THIRDPARTY_NOTICE_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR} 
+                ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/AppendLicenses.cmake "${LICENSE_FILES}" ${THIRDPARTY_NOTICE_FILE}
+        COMMENT "Concatenating license files into ${THIRDPARTY_NOTICE_FILE}"
+    )
+
+    # Custom target that triggers the custom command
+    add_custom_target(${DEPENDENCY_TARGET}_licenses ALL
+        DEPENDS ${THIRDPARTY_NOTICE_FILE}
+    )
+
+    # Ensure this target is built after the specified dependency
+    add_dependencies(${DEPENDENCY_TARGET}_licenses ${DEPENDENCY_TARGET})
+endfunction()
+
+
 # Load the CMake ExternalProject module
 include(ExternalProject)
 add_subdirectory(external)
@@ -57,6 +81,7 @@ set(SENSING_DEV_INSTALLER_VCSVERSION "${SENSING_DEV_INSTALLER_VERSION_MAJOR}.${S
 message(STATUS "Sensing Dev Installer Version : ${SENSING_DEV_INSTALLER_VCSVERSION}")
 
 
+
 # # Install sensing-dev-installer
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
@@ -70,11 +95,11 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/GenDC/gendc_separator DESTINATION
 
 # For MSVC generator
 if(MSVC)    
-    install(FILES ${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt DESTINATION license)
+    install(FILES  ${THIRDPARTY_NOTICE_FILE} DESTINATION license)
     set(THIRPARTY_NOTICE_FILE_RTF "${CMAKE_BINARY_DIR}/license/thirdparty_notice.rtf")
 
     # Copy and concatenate license files
-    file(READ  ${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt content)
+    file(READ  ${THIRDPARTY_NOTICE_FILE} content)
     file(WRITE ${THIRPARTY_NOTICE_FILE_RTF} "${content}\n--------\n")
     install(DIRECTORY ${CMAKE_BINARY_DIR}/license/ DESTINATION license)    
 endif()

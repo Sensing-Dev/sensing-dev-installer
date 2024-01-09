@@ -78,6 +78,13 @@ add_library(opencv INTERFACE)
 add_dependencies(opencv opencv_external opencv_external_linux)
 target_include_directories(opencv INTERFACE ${OPENCV_DIR}/include)
 
+## Update thirdparty_notice.txt
+file(GLOB_RECURSE license_files 
+            ${OPENCV_DIR}/build/LICENSE 
+            ${OPENCV_DIR}/build/LICENSE_FFMPEG.txt 
+            ${OPENCV_DIR}/build/etc/licenses/* )
+concatenate_licenses("${THIRDPARTY_NOTICE_FILE}" "${license_files}" opencv_external)
+
 # Install opencv library, binaries, includes, and shared files
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/opencv/${OPENCV_OS_FILE}/ DESTINATION install)
 message("OPENCV_DIR = ${OPENCV_DIR}")
@@ -87,11 +94,7 @@ install(DIRECTORY ${OPENCV_DIR}/build/x64/vc15/lib/ DESTINATION lib)
 install(DIRECTORY ${OPENCV_DIR}/build/include/ DESTINATION include)
 
 
-## Update thirdparty_notice.txt
-file(GLOB_RECURSE license_files 
-            ${OPENCV_DIR}/build/LICENSE 
-            ${OPENCV_DIR}/build/LICENSE_FFMPEG.txt 
-            ${OPENCV_DIR}/build/etc/licenses/* )
+
 # installer\external\opencv\build\etc\licenses
 message(VERBOSE "OpenCV Liscence file found: ${license_files}")
 

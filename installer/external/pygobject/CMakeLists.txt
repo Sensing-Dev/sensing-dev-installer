@@ -79,6 +79,10 @@ add_library(pygobject INTERFACE)
 add_dependencies(pygobject pygobject_external)
 target_include_directories(pygobject INTERFACE ${PYGOBJECT_DIR}/include)
 
+set(LICENSE_FILES_GLOB "${PYGOBJECT_DIR}/license/COPYING")
+concatenate_licenses(${THIRDPARTY_NOTICE_FILE} ${LICENSE_FILES_GLOB} pygobject_external)
+
+
 # Install pygobject library, binaries, includes, and shared files
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/pygobject/${PYGOBJECT_OS_FILE}/ DESTINATION install)
 install(DIRECTORY ${PYGOBJECT_DIR}/include/ DESTINATION include)
@@ -87,22 +91,6 @@ install(DIRECTORY ${PYGOBJECT_DIR}/share/ DESTINATION share)
 install(DIRECTORY ${PYGOBJECT_DIR}/lib/ DESTINATION lib)
 # install(DIRECTORY ${PYGOBJECT_DIR}/license/ DESTINATION license)
 
-
-
-file(GLOB_RECURSE license_files ${PYGOBJECT_DIR}/license/COPYING )
-# installer\external\pygobject\pygobject-0.3.1-win64\license\LICENSE
-message(VERBOSE "Liscence file found: ${license_files}")
-
-set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
-
-# Copy and concatenate license files
-file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
-
-foreach(license ${license_files})
-    message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
-    file(READ ${license} license_content)
-    file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
-endforeach()
 
 install(FILES ${THIRPARTY_NOTICE_FILE}
             DESTINATION license
