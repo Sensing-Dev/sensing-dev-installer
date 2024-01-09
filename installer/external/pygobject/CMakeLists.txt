@@ -2,8 +2,9 @@ include(ExternalProject)
 
 # Define variables
 set(PYGOBJECT_NAME "pygobject")
-set(PYGOBJECT_ACTION "download") # You can set this to a specific action or leave it empty
+set(PYGOBJECT_ACTION "download" CACHE STRING "pygobject action [build, download, use_existing")
 
+message("PYGOBJECT_ACTION : ${PYGOBJECT_ACTION}")
 # Call the Python script and capture its output
 execute_process(
     COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${PYGOBJECT_NAME} --action ${PYGOBJECT_ACTION} --config-path ${CONFIG_PATH}
@@ -69,7 +70,11 @@ elseif(PYGOBJECT_ACTION STREQUAL "download")
     # Add pygobject external project
     
 elseif(PYGOBJECT_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
+    list(GET OUTPUT_LIST 1 PYGOBJECT_SOURCE)
+    list(GET OUTPUT_LIST 2 PYGOBJECT_INSTALL)
+    message("PYGOBJECT_SOURCE : ${PYGOBJECT_SOURCE}")
+    message("PYGOBJECT_INSTALL: ${PYGOBJECT_INSTALL}")
+    set(PYGOBJECT_DIR  ${CMAKE_SOURCE_DIR}/${PYGOBJECT_INSTALL}-${PYGOBJECT_VERSION})
 else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()

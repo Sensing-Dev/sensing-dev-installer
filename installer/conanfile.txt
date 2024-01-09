@@ -1,0 +1,32 @@
+[requires]
+glib/2.78.0
+#gstreamer/1.19.1
+#gst-plugins-base/1.19.1
+#gtk/4.4.0
+libxml2/2.9.12
+zlib/1.2.13
+libusb/1.0.24
+#cairo/1.17.4
+winflexbison/2.5.24
+
+[tool_requires]
+meson/0.60.0
+pkgconf/1.7.4
+
+[generators]
+pkg_config
+virtualenv
+virtualbuildenv
+virtualrunenv
+
+[options]
+glib/*:shared=True
+gstreamer/*:shared=True
+gst-plugins-base/*:shared=True
+
+[imports]
+bin, *.dll -> ./dependencies/bin
+bin, *.exe -> ./dependencies/bin
+lib, *.lib -> ./dependencies/lib
+include, *.h -> ./dependencies/include
+lib, *.h -> ./dependencies/include

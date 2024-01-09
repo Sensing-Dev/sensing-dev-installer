@@ -1,0 +1,33 @@
+
+[requires]
+glib/2.76.3
+pango/1.50.7
+libpng/1.6.40
+gstreamer/1.22.3
+gtk/4.4.0
+gst-plugins-base/1.19.2    #  Disable gstreamer for now, latest gst-plugins-base is 1.19.2
+libiconv/1.17
+libxml2/2.10.3
+zlib/1.2.13
+libusb/1.0.26
+#gobject-introspection/1.69.0
+
+[generators]
+PkgConfigDeps
+VirtualBuildEnv
+VirtualRunEnv
+CMakeToolchain
+CMakeDeps
+
+[options]
+glib:shared=True
+gstreamer:shared=True
+gst-plugins-base:shared=True
+
+
+[imports]
+bin, *.dll -> ./dependencies/bin
+bin, *.exe -> ./dependencies/bin
+lib, *.lib -> ./dependencies/lib
+include, *.h -> ./dependencies/include
+lib, *.h -> ./dependencies/include

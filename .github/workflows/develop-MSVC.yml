@@ -3,92 +3,307 @@ name: Sensing dev installer Build, Test
 on:
   push:
     branches:
-      - '*'  # This will run the build and test jobs for every push on all branches
+      #     - '*'  # This will run the build and test jobs for pull requests to all branches
+      - 'feature/8-build-aravis-in-workflow'  # This will run the build and test jobs for every push on all branches
 
-  pull_request:
-    branches:
-      - '*'  # This will run the build and test jobs for pull requests to all branches
+  # pull_request:
+  #   branches:
+  #     - '*'  # This will run the build and test jobs for pull requests to all branches
+
+
+
+env:
+  PYTHON_VERSION: '3.11.4'
+  PYGOBJECT_REPO_PATH: installer\pygobject
+  PYGOBJECT_GIT_REPO: https://github.com/Sensing-Dev/pygobject.git
+  PYGOBJECT_PKG_URL: https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/pygobject-3.42.2.zip
+  PYGOBJECT_PKG_SHA: 'eea9465b7cbf1420ee3b3d8a78f6cfa3feeff89ffade7ab1874ebb25d7078037'
+  PYGOBJECT_INSTALL_PATH: installer\dependencies\pygobject
+  ARAVIS_REPO_PATH: installer\aravis
+  ARAVIS_GIT_REPO: https://github.com/AravisProject/aravis.git
+  ARAVIS_INSTALL_PATH: installer\dependencies\aravis
+  ARAVIS_DEP_PATH: installer\dependencies\aravis_dependencies
+  DEPENDENCIES_DIR: installer\dependencies
+  BUILD_PATH: installer\build
+  CONAN_USER_HOME: "${{ github.workspace }}/release/"
+  CONAN_USER_HOME_SHORT: "${{ github.workspace }}/release/short"
 
 
 jobs:
-  build:
+
+  pygobject:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pygobject_version: ["3.42.2"]
+        glib_version: ["2.78.0"]
+        gobject_introspection_version: ["1.78.0"] #minor.patch should be same as glib
+
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4.7.1
+      with:
+         python-version: " ${{ env.PYTHON_VERSION }}"   
+
+    - name: pip install      
+      run:  python -m pip install PyYAML conan==1.50
     
-    steps:
-      - name: Setup Python
-        uses: actions/setup-python@v4.7.1
-        with:
-         python-version: "3.11.4"
+    - name: Checkout repository
+      uses: actions/checkout@v4.1.1
+      with:
+        submodules: recursive   
 
-      - name: Install Conan and PyYAML via pip
-        run: |
-         python -m pip install conan
-         python -m pip install PyYAML
+    - name: Checkout Pygobject repository
+      uses: actions/checkout@v4.1.1
+      with:
+        repository:  "GNOME/pygobject"
+        ref: "${{ matrix.pygobject_version }}"
+        path: ${{ env.PYGOBJECT_REPO_PATH }}
+        submodules: recursive  
 
-      - name: Disable Perl (remove from PATH)
-        run: choco uninstall strawberryperl -n
+    - name: Get dependencies using Conan
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+      run: |
+        echo "::group::conan"
+        conan install ${{ github.workspace }}\installer\external\pygobject\conanfile.txt -b missing -if build
+        echo "::endgroup::"
 
-      - name: Install WiX Toolset
-        run: choco install wixtoolset -y
-
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-        with:
-          submodules: recursive
-
-      - name: Create and enter the build directory
-        run: |
-          cd installer
-          mkdir build
-          cd build
-
-      - name: Run CMake
-        working-directory: installer/build
-        run: cmake -G "Visual Studio 17 2022" -A x64 ../
-
-      - name: Build with CMake
-        working-directory: installer/build
-        run: cmake --build . --config Release
-
-      - name: Package with CPack WIX
-        working-directory: installer/build
-        run: cpack -G "WIX"
-
-      - name: Upload artifacts MSI
-        uses: actions/upload-artifact@v2
-        with:
-          name: sensing-dev-installer-msi
-          path: |
-            installer/build/*.msi
-
-      - name: Create package zip
-        working-directory: installer/build
-        run: cpack -G "ZIP"
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.3
-        with:
-          name: sensing-dev-installer-zip
-          path: |
-            installer/build/*.zip
-
+    - name: Meson build Pygobject
+      working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+      shell: cmd
+      run: |
       
-            
-  test:
-    needs: build
-    runs-on: windows-latest
+        echo "::group::env"
+        SET "sourceDir=%CD%"
+        SET "buildDir=%sourceDir%\build"
+        SET "installDir=${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}"
+        SET "pkgConfigDir=%buildDir%"
+        SET "dependenciesDir=%buildDir%\dependencies"
+        CALL .\build\activate.bat
+        CALL .\build\activate_build.bat
+        CALL .\build\activate_run.bat
+        SET "PKG_CONFIG_PATH=%pkgConfigDir%;%PKG_CONFIG_PATH%"
+        SET PKG_CONFIG_PATH
+        echo "::endgroup::"
+        echo "::group::setup"
+        meson setup %buildDir% %sourceDir% --prefix=%installDir% --buildtype release -Dpycairo=disabled -Dtests=false --pkg-config-path %PKG_CONFIG_PATH%
+        echo "::endgroup::"
+        echo "::group::build"
+        meson compile -C %buildDir% -v
+        echo "::endgroup::"
+        echo "::group::install"
+        meson install -C %buildDir%
+        dir %buildDir%
+        dir %installDir%
+        echo "::endgroup::"
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
+    - name: Zip Release
+      uses: TheDoctor0/zip-release@0.7.6
+      with:
+    # Filename for archive
+        filename: pygobject_${{ matrix.pygobject_version }}.zip
+    # Base path for archive files
+        path: ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }}
+    # Working directory before zipping
+        directory:  ${{ env.PYGOBJECT_REPO_PATH }}
+    # List of excluded files / directories
+        #exclusions: # optional, default is 
+    # List of excluded files / directories with recursive wildcards (only applies on Windows with `zip` type)
+        #recursive_exclusions: # optional, default is 
+    # Provide any custom parameters to the zipping command
+      #custom: # optional, default is 
+    # Tool to use for archiving
+        type: zip
+    # An extra command that will run before zipping
+       #command: # optional, default is 
 
-      - name: Run tests
-        run: |
-          echo "TODO : Running tests..."
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.3
+      with:
+    # Artifact name
+        name: pygobject_${{ matrix.pygobject_version }}
+    # A file, directory or wildcard pattern that describes what to upload
+        path: ${{ env.PYGOBJECT_REPO_PATH }}/*.zip 
+        if-no-files-found: warn    
+        retention-days: 10
+    
 
-  
+#   build:
+#     runs-on: windows-latest
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         aravis_version: ["0.8.25"]
+#         pygobject_version: ["3.42.2"]
+#         glib_version: ["2.78.0"]
+#         gobject_introspection_version: ["1.78.0"] #minor.patch should be same as glib
 
 
+    
 
+#     steps:
+#     # --- Setup Environment ---
+#     - name: Disable Perl And MinGW
+#       run: |
+#           choco uninstall strawberryperl
+#           Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
 
+#     - name: Setup Python
+#       uses: actions/setup-python@v4.7.1
+#       with:
+#          python-version: " ${{ env.PYTHON_VERSION }}" 
 
+#     - name: pip install      
+#       run:  python -m pip install PyYAML conan=1.60
+
+#     - name: Using the builtin GitHub Cache Action for .conan
+#       if: matrix.os == 'windows-latest'
+#       id: cache-conan
+#       uses: actions/cache@v3.3.2
+#       env:
+#         cache-name: cache-conan-modules
+#       with:
+#         path: ${{ env.CONAN_USER_HOME }}
+#         key: ${{ runner.os }}-builder-${{ env.cache-name }}-${{ hashFiles('installer/conanfile.py') }}
+#         restore-keys: ${{ runner.os }}-builder-${{ env.cache-name }}-
+
+# # Checkout all repos
+#     - name: Checkout repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         submodules: recursive    
+
+#     - name: Checkout Aravis repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         repository:  "AravisProject/aravis"
+#         ref: "${{ matrix.aravis_version }}"
+#         path: ${{ env.ARAVIS_REPO_PATH }}
+#         submodules: recursive    
+    
+#     - name: Checkout Aravis repository
+#       uses: actions/checkout@v4.1.1
+#       with:
+#         repository:  "GNOME/pygobject"
+#         ref: "${{ matrix.pygobject_version }}"
+#         path: ${{ env.PYGOBJECT_REPO_PATH }}
+#         submodules: recursive    
+
+#     - name: Create and enter build directory
+#       run: |
+#           cd installer
+#           mkdir build
+#           cd build
+    
+#     - name: Restore Conan Cache
+#       if: steps.cache-conan.outputs.cache-hit == 'true' # Check if cache was restored
+#       run: echo "Conan cache was restored"
+
+#     - name: Get dependencies using Conan
+#       working-directory: installer
+#       run: |
+#         echo "::group::conan"
+#         conan profile detect
+#         conan install .\conanfile.txt -b missing -pr .\conan_profile -if build
+#         echo "::endgroup::"
+
+#         echo "::group::move"
+#         Copy-Item -Path .\build\dependencies -Destination ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }} -Recurse
+#         ls ${{ github.workspace }}\${{ env.ARAVIS_DEP_PATH }}
+#         echo "::endgroup::"
+
+#     - name: Save Conan Cache
+#       if: steps.cache-conan.outputs.cache-hit != 'true' # Check if cache was not restored
+#       run: echo "Conan cache was saved"    
+#      # --- Build with MSVC ---
+#     - name: Setup MSVC Developer Command Prompt
+#       uses: TheMrMilchmann/setup-msvc-dev@v3.0.0
+#       with:
+#         arch: x64
+
+#     - name: Update gobject_introspection_version
+#       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+#       run: |
+#         echo "::group::subproject"
+#         $gobjectWrap=".\subprojects\gobject-introspection.wrap"
+#         $content = Get-Content -Path $gobjectWrap -Raw
+#         $content = $content -replace 'main', ${{ matrix.gobject_introspection_version }}
+#         Set-Content -Path $gobjectWrap -Value $content
+#         echo "::endgroup::"
+
+#     - name: Build pygobject with meson
+#       working-directory: ${{ env.PYGOBJECT_REPO_PATH }}
+#       run: | 
+#         .   ${{ github.workspace }}\installer\tools\build-Pygobject.ps1 -sourceDir ${{ github.workspace }}\${{ env.PYGOBJECT_REPO_PATH }} `
+#                        -nativeINI  ${{ github.workspace }}\installer\external\pygobject\pygobject_native.ini `
+#                        -installDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
+#                        -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+#                        -dependenciesDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\dependencies
+
+#     - name: Build Aravis using meson
+#       working-directory: ${{ env.ARAVIS_REPO_PATH }}
+#       run: |
+#         .   ${{ github.workspace }}\installer\tools\build-Aravis.ps1 -sourceDir ${{ env.ARAVIS_REPO_PATH }} `
+#                        -nativeINI  ${{ github.workspace }}\installer\external\aravis\aravis_native.ini `
+#                        -installDir ${{ github.workspace }}\${{ env.ARAVIS_INSTALL_PATH }} `
+#                        -pkgConfigDir ${{ github.workspace }}\${{ env.BUILD_PATH}}\generators `
+#                        -dependenciesDir ${{ github.workspace }}${{ env.BUILD_PATH}}\dependencies `
+#                        -pygobjectInstallDir ${{ github.workspace }}\${{ env.PYGOBJECT_INSTALL_PATH }} `
+
+#     - name: Run CMake
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cmake -G "Visual Studio 17 2022" `
+#               -D ARAVIS_ACTION="use_existing" `
+#               -D ARAVIS_DEP_ACTION="use_existing" `
+#               -D PYGOBJECT_ACTION="use_existing" `
+#               -A x64 ../
+
+#     - name: Build with CMake
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cmake --build . --config Release
+
+#     - name: Package with CPack WIX
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cpack -G "WIX"
+
+#     - name: Upload artifacts MSI
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: sensing-dev-installer-msi
+#         path: |
+#           ${{ env.BUILD_PATH}}/*.msi
+
+#     - name: Create package zip
+#       working-directory: ${{ env.BUILD_PATH}}
+#       run: cpack -G "ZIP"
+
+#     - name: Upload artifacts
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: sensing-dev-installer-zip
+#         path: |
+#           ${{ env.BUILD_PATH}}/*.zip
+
+#   #     continue-on-error: true
+
+#   #   - name: Upload meson-log on failure
+#   #     if: failure()  # This step will only run if any of the previous steps failed.
+#   #     uses: actions/upload-artifact@v3
+#   #     with:
+#   #       name: meson-log
+#   #       path: ${{ env.ARAVIS_REPO_PATH }}/build/meson-logs/meson-log.txt
+
+#   test:
+#     needs: build
+#     runs-on: windows-latest
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v4
+#       with:
+#         submodules: recursive
+#     - name: Run tests
+#       working-directory: installer
+#       run: |
+#         .\tools\Env.ps1
+#         python .\tests\sensing_dev_test.py
