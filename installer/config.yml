@@ -34,10 +34,10 @@ libraries:
     src_path: ion-kit
     install_path: dependencies/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/ion-kit-0.3.4-win64-patched-3fbe59d.zip"
-    pkg_sha: "855befd9c06c03696fd8d8602c3772da05ab724a64adfd4e2ea5f3d9f0ecb095"
+    pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v0.3.5/ion-kit-0.3.5-win64.zip"
+    pkg_sha: "93ddfeb8ba3aeb02caeb9bd6668527c1ea4b4305172695766f348fe5e7455a5c"
     git_repo: "https://github.com/fixstars/ion-kit.git"
-    version: "0.3.4"
+    version: "0.3.5"
 
   opencv:
     name: opencv

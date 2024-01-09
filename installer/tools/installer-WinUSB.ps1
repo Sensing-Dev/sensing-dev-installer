@@ -20,7 +20,11 @@ $installPath = "$env:TEMP"
 Write-Verbose "installPath = $installPath"
 # Download win_usb installer
 
-$repoUrl = "https://api.github.com/repos/Sensing-Dev/sensing-dev-installer/releases/latest"
+$installerName = "WinUSB-installer-generator"
+
+
+$repoUrl = "https://api.github.com/repos/Sensing-Dev/$installerName/releases/latest"
+# $repoUrl = "https://api.github.com/repos/Sensing-Dev/WinUSB-installer-generator/releases/latest"
 $response = Invoke-RestMethod -Uri $repoUrl
 $version = $response.tag_name
 $version
@@ -30,9 +34,8 @@ if ($version -match 'v(\d+\.\d+\.\d+)(-\w+)?') {
     $versionNum = $matches[1] 
     Write-Output "Installing version: $version" 
 }
-$installerName = "winusb"
 
-$Url = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/v${versionNum}/${installerName}.zip"
+$Url = "https://github.com/Sensing-Dev/$installerName/releases/download/${version}/${installerName}-${versionNum}.zip"
 
 $Url
 
@@ -53,8 +56,8 @@ if ($Url.EndsWith("zip")) {
 
     # Attempt to extract to the temporary extraction directory
     try {
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($tempZipPath, $tempExtractionPath)
-        ls $tempExtractionPath
+        Expand-Archive -Path $tempZipPath -DestinationPath $tempExtractionPath 
+        Get-ChildItem $tempExtractionPath
     }
     catch {
         Write-Error "Extraction failed...."
@@ -68,11 +71,11 @@ if (Test-Path $tempExtractionPath) {
     Write-Host "This may take a few minutes. Starting the installation..."
 
     Write-Verbose "Start winUsb installer"
-    $TempDir = "$tempExtractionPath/winusb/temp"
+    $TempDir = "$tempExtractionPath/temp"
         
     New-item -Path "$TempDir" -ItemType Directory
     $winUSBOptions = @{
-        FilePath               = "${tempExtractionPath}/winusb/winusb_installer.exe"
+        FilePath               = "${tempExtractionPath}/${installerName}-${versionNum}/winusb_installer.exe"
         ArgumentList           = "054c"
         WorkingDirectory       = "$TempDir"
         Wait                   = $true
