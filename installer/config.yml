@@ -4,10 +4,10 @@ libraries:
     src_path: aravis
     install_path: install/aravis
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis_internal_0.8.30_win64.zip"
-    pkg_sha: "62bb20c14a916c2780ae7809223eeaa9a077a6721ca95c80932ddbc6dc6f328a"
+    pkg_url: "https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-win64.zip"
+    pkg_sha: "a328e603e8bef843f3824f0d04e5d6b754ee9a82d4c388044d48ae4cd35f89a8"
     git_repo: "https://github.com/Sensing-Dev/aravis.git"
-    version: "0.8.25"
+    version: "0.8.30-internal"
 
   pygobject:
     name: pygobject
