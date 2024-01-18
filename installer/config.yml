@@ -4,10 +4,10 @@ libraries:
     src_path: aravis
     install_path: install/aravis
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-0.8.25-patched-0fec828.zip"
-    pkg_sha: "233bcac1f50fbd2aea6f9572171a77e0655386709a7813ef993b05e3168c6e8f"
-    git_repo: "https://github.com/AravisProject/aravis.git"
-    version: "0.8.25"
+    pkg_url: "https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-win64.zip"
+    pkg_sha: "a328e603e8bef843f3824f0d04e5d6b754ee9a82d4c388044d48ae4cd35f89a8"
+    git_repo: "https://github.com/Sensing-Dev/aravis.git"
+    version: "0.8.30-internal"
 
   pygobject:
     name: pygobject
@@ -24,10 +24,10 @@ libraries:
     src_path: ion-kit
     install_path: install/ion-kit
     action: download # can be 'download', 'build', or 'use_existing'
-    pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v0.3.5/ion-kit-0.3.5-win64.zip"
-    pkg_sha: "93ddfeb8ba3aeb02caeb9bd6668527c1ea4b4305172695766f348fe5e7455a5c"
+    pkg_url: "https://github.com/fixstars/ion-kit/releases/download/v1.0.0/ion-kit-1.0.0-x86-64-windows.zip"
+    pkg_sha: "e5e32c7340777ad9dbeea52daa99f569db597b7ab0f3a10f932f04de28df5ec7"
     git_repo: "https://github.com/fixstars/ion-kit.git"
-    version: "0.3.5"
+    version: "v1.0.0"
 
   opencv:
     name: opencv
