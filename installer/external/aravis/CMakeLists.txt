@@ -109,7 +109,7 @@ add_dependencies(aravis aravis_external aravis_dependencies)
 target_include_directories(aravis INTERFACE ${ARAVIS_DIR}/include ${ARAVIS_DEP_DIR}/include)
 
 set(LICENSE_FILES_GLOB "${ARAVIS_DIR}/license/COPYING")
-concatenate_licenses(${THIRDPARTY_NOTICE_FILE} ${LICENSE_FILES_GLOB} aravis_external)
+concatenate_licenses(${ARAVIS_NAME} ${THIRDPARTY_NOTICE_FILE} ${LICENSE_FILES_GLOB} aravis_external)
 
 # Install aravis library, binaries, includes, and shared files
 install(DIRECTORY ${ARAVIS_DEP_DIR}/include/ DESTINATION include)

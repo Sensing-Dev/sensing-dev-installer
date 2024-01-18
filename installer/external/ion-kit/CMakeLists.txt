@@ -86,7 +86,7 @@ add_dependencies(ion-kit ion-kit_external )
 target_include_directories(ion-kit INTERFACE ${ION_KIT_DIR}/include)
 
 file(GLOB_RECURSE license_files ${ION_KIT_DIR}/license/LICENSE ${ION_KIT_DIR}/license/*thirdparty_notice.txt*)
-concatenate_licenses(${THIRDPARTY_NOTICE_FILE} "${license_files}" ion-kit_external)
+concatenate_licenses(${ION_KIT_NAME} ${THIRDPARTY_NOTICE_FILE} "${license_files}" ion-kit_external)
 
 # Install ion-kit library, binaries, includes, and shared files
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/ion-kit/${ION_KIT_OS_FILE}/ DESTINATION install)

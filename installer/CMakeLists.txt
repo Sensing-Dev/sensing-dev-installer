@@ -6,26 +6,39 @@ message(STATUS "Building with CMake version: ${CMAKE_VERSION}")
 
 set(THIRDPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
 # Define a function to create custom commands and targets for license file concatenation
-function(concatenate_licenses THIRDPARTY_NOTICE_FILE LICENSE_FILES DEPENDENCY_TARGET)
-    # Custom command to concatenate license files
-    add_custom_command(
-        OUTPUT ${THIRDPARTY_NOTICE_FILE}
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/license"
-        COMMAND ${CMAKE_COMMAND} -E echo "--------" > ${THIRDPARTY_NOTICE_FILE}
-        COMMAND ${CMAKE_COMMAND} -E echo_append "Appending license files to ${THIRDPARTY_NOTICE_FILE}"
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR} 
-                ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/AppendLicenses.cmake "${LICENSE_FILES}" ${THIRDPARTY_NOTICE_FILE}
-        COMMENT "Concatenating license files into ${THIRDPARTY_NOTICE_FILE}"
-    )
+function(concatenate_licenses PROJECT_NAME THIRDPARTY_NOTICE_FILE LICENSE_FILES DEPENDENCY_TARGET)
 
-    # Custom target that triggers the custom command
-    add_custom_target(${DEPENDENCY_TARGET}_licenses ALL
-        DEPENDS ${THIRDPARTY_NOTICE_FILE}
-    )
+    # Check if the file does not exist
+    if(NOT EXISTS "${THIRDPARTY_NOTICE_FILE}")
+        # Create an empty file
+        file(WRITE "${THIRDPARTY_NOTICE_FILE}" "")
+        message(STATUS "Created file: ${THIRDPARTY_NOTICE_FILE}")
+    else()
+        message(STATUS "File already exists: ${THIRDPARTY_NOTICE_FILE}")
+    endif()
 
-    # Ensure this target is built after the specified dependency
-    add_dependencies(${DEPENDENCY_TARGET}_licenses ${DEPENDENCY_TARGET})
+    # Header for the notice file
+    file(APPEND "${THIRDPARTY_NOTICE_FILE}" "Third-Party Notices for ${PROJECT_NAME}\n\n")
+
+    # Iterate over each license file and append its contents
+    foreach(LICENSE_FILE IN LISTS LICENSE_FILES)
+        # Check if the license file exists
+        if(EXISTS "${LICENSE_FILE}")
+            # Append the content of the license file
+            file(READ "${LICENSE_FILE}" CONTENTS)
+            file(APPEND "${THIRDPARTY_NOTICE_FILE}" "\n${CONTENTS}\n")
+        else()
+            message(WARNING "License file not found: ${LICENSE_FILE}")
+        endif()
+    endforeach()
+
+    # Add a dependency target if specified
+    if(DEPENDENCY_TARGET)
+        add_dependencies(${PROJECT_NAME} ${DEPENDENCY_TARGET})
+    endif()
+
 endfunction()
+
 
 
 # Load the CMake ExternalProject module
@@ -95,8 +108,5 @@ if(MSVC)
     file(WRITE ${THIRPARTY_NOTICE_FILE_RTF} "${content}\n--------\n")
     install(DIRECTORY ${CMAKE_BINARY_DIR}/license/ DESTINATION license)    
 endif()
-
-# install(CODE "execute_process(COMMAND powershell -ExecutionPolicy Bypass -File \${CMAKE_INSTALL_PREFIX}/tools/Env.ps1 -installPath \${CMAKE_INSTALL_PREFIX})")
-
 
 include(cmake/CPackConfig.cmake)

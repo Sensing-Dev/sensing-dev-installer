@@ -80,7 +80,7 @@ add_dependencies(pygobject pygobject_external)
 target_include_directories(pygobject INTERFACE ${PYGOBJECT_DIR}/include)
 
 set(LICENSE_FILES_GLOB "${PYGOBJECT_DIR}/license/COPYING")
-concatenate_licenses(${THIRDPARTY_NOTICE_FILE} ${LICENSE_FILES_GLOB} pygobject_external)
+concatenate_licenses(${PYGOBJECT_NAME}  ${THIRDPARTY_NOTICE_FILE} ${LICENSE_FILES_GLOB} pygobject_external)
 
 
 # Install pygobject library, binaries, includes, and shared files
@@ -89,9 +89,3 @@ install(DIRECTORY ${PYGOBJECT_DIR}/include/ DESTINATION include)
 install(DIRECTORY ${PYGOBJECT_DIR}/bin/ DESTINATION bin)
 install(DIRECTORY ${PYGOBJECT_DIR}/share/ DESTINATION share)
 install(DIRECTORY ${PYGOBJECT_DIR}/lib/ DESTINATION lib)
-# install(DIRECTORY ${PYGOBJECT_DIR}/license/ DESTINATION license)
-
-
-install(FILES ${THIRPARTY_NOTICE_FILE}
-            DESTINATION license
-        )

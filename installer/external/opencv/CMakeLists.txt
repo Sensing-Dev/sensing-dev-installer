@@ -83,7 +83,7 @@ file(GLOB_RECURSE license_files
             ${OPENCV_DIR}/build/LICENSE 
             ${OPENCV_DIR}/build/LICENSE_FFMPEG.txt 
             ${OPENCV_DIR}/build/etc/licenses/* )
-concatenate_licenses("${THIRDPARTY_NOTICE_FILE}" "${license_files}" opencv_external)
+concatenate_licenses("${OPENCV_NAME}" "${THIRDPARTY_NOTICE_FILE}" "${license_files}" opencv_external)
 
 # Install opencv library, binaries, includes, and shared files
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/opencv/${OPENCV_OS_FILE}/ DESTINATION install)
@@ -92,19 +92,3 @@ install(DIRECTORY ${OPENCV_DIR}/build/bin/ DESTINATION bin)
 install(DIRECTORY ${OPENCV_DIR}/build/x64/vc15/bin/ DESTINATION bin)
 install(DIRECTORY ${OPENCV_DIR}/build/x64/vc15/lib/ DESTINATION lib)
 install(DIRECTORY ${OPENCV_DIR}/build/include/ DESTINATION include)
-
-
-
-# installer\external\opencv\build\etc\licenses
-message(VERBOSE "OpenCV Liscence file found: ${license_files}")
-
-set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
-
-# Copy and concatenate license files
-file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
-
-foreach(license ${license_files})
-    message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
-    file(READ ${license} license_content)
-    file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
-endforeach()
