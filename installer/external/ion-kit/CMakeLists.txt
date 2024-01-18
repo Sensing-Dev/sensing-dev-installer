@@ -97,7 +97,7 @@ file(GLOB_RECURSE license_files ${ION_KIT_DIR}/license/LICENSE ${ION_KIT_DIR}/li
 # installer\external\ion-kit\ion-kit-0.3.1-win64\license\LICENSE
 message(VERBOSE  "Ion-kit Liscence file found: ${license_files}")
 set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
-file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
+file(WRITE ${THIRPARTY_NOTICE_FILE} "${ION_KIT_NAME}\n--------\n")
 foreach(license ${license_files})
     message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
     file(READ ${license} license_content)

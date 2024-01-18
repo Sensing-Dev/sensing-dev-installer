@@ -96,7 +96,7 @@ message(VERBOSE "Liscence file found: ${license_files}")
 set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
 
 # Copy and concatenate license files
-file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
+file(WRITE ${THIRPARTY_NOTICE_FILE} "${PYGOBJECT_NAME}\n--------\n")
 
 foreach(license ${license_files})
     message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
