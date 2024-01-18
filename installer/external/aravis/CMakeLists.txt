@@ -116,19 +116,4 @@ install(DIRECTORY ${ARAVIS_DEP_DIR}/include/ DESTINATION include)
 install(DIRECTORY ${ARAVIS_DEP_DIR}/bin/ DESTINATION bin)
 install(DIRECTORY ${ARAVIS_DEP_DIR}/lib/ DESTINATION lib)
 
-# file(GLOB_RECURSE license_files ${ARAVIS_DIR}/license/COPYING )
-# # installer\external\aravis\aravis-0.3.1-win64\license\LICENSE
-# message(VERBOSE "ARAVIS Liscence file found: ${license_files}")
-
-# set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
-
-# # Copy and concatenate license files
-# file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
-
-# foreach(license ${license_files})
-#     message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
-#     file(READ ${license} license_content)
-#     file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
-# endforeach()
-
     

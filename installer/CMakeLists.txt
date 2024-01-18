@@ -35,15 +35,6 @@ add_subdirectory(external)
 # Add your main executable
 add_executable(${PROJECT_NAME} src/installer.cpp)
 
-# Link against aravis, pygobject, ion-kit, and OpenCV libraries
-# target_link_libraries(${PROJECT_NAME} aravis::aravis)
-
-
-#version
-# set(SENSING_DEV_INSTALLER_VERSION_MAJOR 23)
-# set(SENSING_DEV_INSTALLER_VERSION_MINOR 08)
-# set(SENSING_DEV_INSTALLER_VERSION_PATCH 00)
-
 execute_process(
     COMMAND git describe --abbrev=0 --tags
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

@@ -92,17 +92,5 @@ concatenate_licenses(${THIRDPARTY_NOTICE_FILE} "${license_files}" ion-kit_extern
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/ion-kit/${ION_KIT_OS_FILE}/ DESTINATION install)
 install(DIRECTORY ${ION_KIT_DIR}/bin/ DESTINATION bin)
 install(DIRECTORY ${ION_KIT_DIR}/include/ DESTINATION include)
-#install(DIRECTORY ${ION_KIT_DIR}/share/ DESTINATION share)
 install(DIRECTORY ${ION_KIT_DIR}/lib/ DESTINATION lib)
-
-# Copy and concatenate license files
-# installer\external\ion-kit\ion-kit-0.3.1-win64\license\LICENSE
-# message(VERBOSE  "Ion-kit Liscence file found: ${license_files}")
-# set(THIRPARTY_NOTICE_FILE "${CMAKE_BINARY_DIR}/license/thirdparty_notice.txt")
-# file(WRITE ${THIRPARTY_NOTICE_FILE} "--------\n")
-# foreach(license ${license_files})
-#     message (VERBOSE "Copying ${license} to ${THIRPARTY_NOTICE_FILE}")
-#     file(READ ${license} license_content)
-#     file(APPEND ${THIRPARTY_NOTICE_FILE} "${license_content}\n--------\n")
-# endforeach()
 
