@@ -11,12 +11,12 @@ libraries:
 
   aravis_dep:
     name: aravis_dep
-    src_path: install/aravis_dep
+    src_path: aravis_dep
     install_path: install/aravis_dep
     action: download # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/Aravis-0.8.30-internal-dependencies.zip"
     pkg_sha: "f1f93b6c8ee2dd881e7c8950b06562159fb55f615d7ae2de165d861194e9b6c3"
-    git_repo: "https://github.com/conan-io/conan-center-index.git"
+    git_repo: "https://github.com/conan-io/conan-center-index.git" # use recipe here for appropriate version
     version: "0.8.30-internal"
 
   pygobject:
