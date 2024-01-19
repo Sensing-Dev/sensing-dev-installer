@@ -59,7 +59,7 @@ jobs:
 
       - name: Create package without opencv
         working-directory: installer/build
-        run:  cmake -G "Visual Studio 17 2022" -A x64 ../ -DOPENCV_ACTION= "use_existing"
+        run:  cmake -G "Visual Studio 17 2022" -A x64 ../ -DOPENCV_ACTION="use_existing"
 
       - name: Create package msi
         working-directory: installer/build
