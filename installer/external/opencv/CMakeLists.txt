@@ -68,7 +68,7 @@ elseif(OPENCV_ACTION STREQUAL "download")
     )  
     
 elseif(OPENCV_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
+    message(STATUS "Use local Opencv ")
 else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
 endif()
