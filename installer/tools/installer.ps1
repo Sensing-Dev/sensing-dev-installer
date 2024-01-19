@@ -1,32 +1,41 @@
 <#
 .SYNOPSIS
-Script for downloading and installing Sensing SDK-installer
+Installs the Sensing SDK.
 
 .DESCRIPTION
-Downloads and install zip or msi of the given version or the latest version
+This script downloads and installs the Sensing SDK. You can specify a particular version or the latest version will be installed by default. It supports both .zip and .msi installers.
 
 .PARAMETER version
-Specifies the version. The default is 'latest'.
+Specifies the version of the Sensing SDK to be installed. Default is 'latest'.
 
 .PARAMETER user
-Specifies the user name. Use this to install the installer at users' LOCALAPPDATA
+Specifies the username for which the Sensing SDK will be installed. This determines the installation path in the user's LOCALAPPDATA.
 
 .PARAMETER Url
-Installer URL to be used by the script or function.
+URL of the Sensing SDK installer. If not provided, the script constructs the URL based on the specified or default version.
 
 .PARAMETER installPath
-Specifies the installation path. The default is the sensing-dev-installer directory in the user's LOCALAPPDATA.
+The installation path for the Sensing SDK. Default is the sensing-dev-installer directory in the user's LOCALAPPDATA.
+
+.PARAMETER InstallOpenCV
+If set, the script will also install OpenCV. This is not done by default.
 
 .EXAMPLE
 PS C:\> .\installer.ps1 -version 'v24.09.03' -user 'Admin' -Url 'http://example.com'
 
-This example demonstrates how to run the script with custom version, user, and Url values.
+This example demonstrates how to run the script with custom version, user, and URL values.
+
+.EXAMPLE
+PS C:\> .\installer.ps1 -InstallOpenCV
+
+This example demonstrates how to run the script with the default settings and includes the installation of OpenCV.
 
 .NOTES
-Any additional notes related to the script or function.
+Ensure that you have the necessary permissions to install software and write to the specified directories.
 
 .LINK
 http://example.com/documentation-link
+
 #>
 
 param(
@@ -34,7 +43,7 @@ param(
     [string]$user,
     [string]$Url,
     [string]$installPath,
-    [switch]$InstallOpencv = $false 
+    [switch]$InstallOpenCV = $false 
 )
 # Check if the MSI URL and Install Path are provided
 if ( -not $installPath) {
@@ -64,7 +73,7 @@ if (-not $Url ) {
         Write-Output "Installing version: $version" 
    }
     $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-"
-    if ($InstallOpencv) {
+    if ($InstallOpenCV) {
         $baseUrl = "${baseUrl}-no-opencv"
     }
     $zipUrl = "${baseUrl}-win64.zip"
