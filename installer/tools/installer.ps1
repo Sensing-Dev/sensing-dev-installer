@@ -33,7 +33,8 @@ param(
     [string]$version,
     [string]$user,
     [string]$Url,
-    [string]$installPath 
+    [string]$installPath,
+    [switch]$InstallOpencv = $false 
 )
 # Check if the MSI URL and Install Path are provided
 if ( -not $installPath) {
@@ -62,9 +63,12 @@ if (-not $Url ) {
         $versionNum = $matches[1] 
         Write-Output "Installing version: $version" 
    }
-
-    $zipUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-win64.zip"
-    $msiUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-win64.msi"
+    $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-"
+    if ($InstallOpencv) {
+        $baseUrl = "${baseUrl}-no-opencv"
+    }
+    $zipUrl = "${baseUrl}-win64.zip"
+    $msiUrl = "${baseUrl}-win64.msi"
 
     if ($user) {
         $Url = "$zipUrl"

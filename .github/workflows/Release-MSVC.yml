@@ -66,14 +66,16 @@ jobs:
         run: |
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          cpack -G "WIX" -p "sensing-dev-${TAG_NAME}-no-opencv"
+          cpack -G "WIX" -p "sensing-dev-${TAG_NAME}-no_opencv-win64"
+          cpack -G "WIX"
 
       - name: Create package zip
         working-directory: installer/build
         run:  |
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          cpack -G "ZIP" -p "sensing-dev-${TAG_NAME}-no-opencv"
+          cpack -G "ZIP" -p "sensing-dev-${TAG_NAME}-no_opencv--win64"
+          cpack -G "ZIP"
 
       - name: Release      
         uses: softprops/action-gh-release@v1
