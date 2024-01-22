@@ -73,16 +73,62 @@ else()
     message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
 endif()
 
-set(ARAVIS_DEP_DIR "${CMAKE_BINARY_DIR}/external/aravis_dependencies/src/aravis_dep")
-set(ARAVIS_DEP_WIN_URL_HASH "c0b26fc0c0d2fde51f13107b450c66808ee88d15c2adb0a1f6d4b473f282c3a9")
+#-----------------------------------------------------------------------------------------------------------
 
 
-ExternalProject_Add(
-        aravis_dependencies
-        PREFIX ${CMAKE_BINARY_DIR}/external/aravis_dependencies
-        URL "https://ion-kit.s3.us-west-2.amazonaws.com/dependencies/Aravis-dependencies.zip"
-        URL_HASH SHA256=${ARAVIS_DEP_WIN_URL_HASH}  # Use SHA-256 hash
-        DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/aravis_dependencies/downloads  # Specify a downloads directory
+# Define variables
+set(ARAVIS_DEP_NAME "aravis_dep")
+set(ARAVIS_DEP_ACTION "download") # You can set this to a specific action or leave it empty
+
+# Call the Python script and capture its output
+execute_process(
+    COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${ARAVIS_DEP_NAME} --action ${ARAVIS_DEP_ACTION} --config-path ${CONFIG_PATH}
+    OUTPUT_VARIABLE OUTPUT_VALUE
+    RESULTS_VARIABLE  RESULT_CODE
+    ERROR_VARIABLE error
+)
+
+
+if(RESULT_CODE)
+    message(FATAL_ERROR "Error while parsing config: ${OUTPUT_VALUE}")
+endif()
+
+#Split the output into a list
+string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
+
+# Set the variables
+list(GET OUTPUT_LIST 0 ARAVIS_DEP_NAME)
+list(GET OUTPUT_LIST 3 ARAVIS_DEP_ACTION)
+list(GET OUTPUT_LIST 7 ARAVIS_DEP_VERSION)
+
+# Print to verify
+message("ARAVIS_DEP_NAME  ${ARAVIS_DEP_NAME}")
+message("ARAVIS_DEP_VERSION: ${ARAVIS_DEP_VERSION}")
+
+message("ARAVIS_DEP_ACTION : ${ARAVIS_DEP_ACTION}")
+
+set(ARAVIS_DEP_OS_FILE Aravis-${ARAVIS_DEP_VERSION})
+set(ARAVIS_DEP_PREFIX ${CMAKE_BINARY_DIR}/external/${ARAVIS_DEP_NAME})
+set(ARAVIS_DEP_DIR ${ARAVIS_DEP_PREFIX}/src/${ARAVIS_DEP_NAME})
+
+if(ARAVIS_DEP_ACTION STREQUAL "build")
+
+    list(GET OUTPUT_LIST 6 ARAVIS_DEP_GIT_REPO)
+    message("ARAVIS_DEP_GIT_REPO: ${ARAVIS_DEP_GIT_REPO}")
+    message(FATAL_ERROR "Option Unimplemented")
+
+elseif(ARAVIS_DEP_ACTION STREQUAL "download")
+    list(GET OUTPUT_LIST 4 ARAVIS_DEP_PKG_URL)
+    list(GET OUTPUT_LIST 5 ARAVIS_DEP_PKG_SHA)
+    message("ARAVIS_DEP_PKG_URL: ${ARAVIS_DEP_PKG_URL}")
+    message("ARAVIS_DEP_PKG_SHA : ${ARAVIS_DEP_PKG_SHA}")
+    # # Add aravis external project
+    ExternalProject_Add(
+        aravis_dep_external
+        PREFIX ${ARAVIS_DEP_PREFIX}
+        URL ${ARAVIS_DEP_PKG_URL}
+        URL_HASH SHA256=${ARAVIS_DEP_PKG_SHA}  # Use SHA-256 hash
+        DOWNLOAD_DIR ${ARAVIS_DEP_PREFIX}/downloads  # Specify a downloads directory
         SOURCE_DIR ${ARAVIS_DEP_DIR}
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
         CONFIGURE_COMMAND ""  # No configure step needed
@@ -91,9 +137,17 @@ ExternalProject_Add(
         # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${ARAVIS_DEP_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/aravis' -Force"
         BUILD_IN_SOURCE FALSE
         BUILD_ALWAYS FALSE  # Adjust this according to your needs
-    )
+        )
+elseif(ARAVIS_DEP_ACTION STREQUAL "use_existing")
 
-
+    list(GET OUTPUT_LIST 1 ARAVIS_DEP_SOURCE)
+    list(GET OUTPUT_LIST 2 ARAVIS_DEP_INSTALL)
+    message("ARAVIS_DEP_SOURCE : ${ARAVIS_DEP_SOURCE}")
+    message("ARAVIS_DEP_INSTALL: ${ARAVIS_DEP_INSTALL}")
+    message(FATAL_ERROR "Option Unimplemented")
+else()
+    message(FATAL_ERROR "Incorrect action option. Valid values are build, download and use_existing")
+endif()
 
 # Install aravis library, binaries, includes, and shared files
 # install(DIRECTORY ${CMAKE_SOURCE_DIR}/external/aravis/ DESTINATION install)

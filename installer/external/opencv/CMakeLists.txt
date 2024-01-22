@@ -1,29 +1,28 @@
 include(ExternalProject)
 
-
 # Define variables
 set(OPENCV_NAME "opencv")
-set(OPENCV_ACTION "download") # You can set this to a specific action or leave it empty
+set(OPENCV_ACTION "download" CACHE STRING "OpenCv action, Valid options are(download or use_existing)") # You can set this to a specific action or leave it empty
 
 # Call the Python script and capture its output
 execute_process(
     COMMAND ${Python_EXECUTABLE} ${CONFIG_PARSER_PATH} --name ${OPENCV_NAME} --action ${OPENCV_ACTION} --config-path ${CONFIG_PATH}
     OUTPUT_VARIABLE OUTPUT_VALUE
-    RESULTS_VARIABLE  RESULT_CODE
+    RESULTS_VARIABLE RESULT_CODE
     ERROR_VARIABLE error
 )
-
 
 if(RESULT_CODE)
     message(FATAL_ERROR "Error while parsing config: ${OUTPUT_VALUE}")
 endif()
 
-#Split the output into a list
+# Split the output into a list
 string(REPLACE "\n" ";" OUTPUT_LIST ${OUTPUT_VALUE})
 
 # Set the variables
 list(GET OUTPUT_LIST 0 OPENCV_NAME)
-list(GET OUTPUT_LIST 3 OPENCV_ACTION)
+
+# list(GET OUTPUT_LIST 3 OPENCV_ACTION)
 list(GET OUTPUT_LIST 7 OPENCV_VERSION)
 
 # Print to verify
@@ -42,36 +41,31 @@ if(OPENCV_ACTION STREQUAL "build")
     message("OPENCV_SOURCE : ${OPENCV_SOURCE}")
     message("OPENCV_INSTALL: ${OPENCV_INSTALL}")
     message("OPENCV_GIT_REPO: ${OPENCV_GIT_REPO}")
-    message(FATAL_ERROR "Option Unimplemented")
+    message(FATAL_ERROR "Option Unimplemented, Please use use_existing or download")
 elseif(OPENCV_ACTION STREQUAL "download")
-
     list(GET OUTPUT_LIST 4 OPENCV_PKG_URL)
     list(GET OUTPUT_LIST 5 OPENCV_PKG_SHA)
 
     message("OPENCV_PKG_URL: ${OPENCV_PKG_URL}")
     message("OPENCV_PKG_SHA : ${OPENCV_PKG_SHA}")
+
     # # Add aravis external project
     ExternalProject_Add(
         opencv_external
         PREFIX ${CMAKE_BINARY_DIR}/external/opencv
         URL ${OPENCV_PKG_URL}
-        URL_HASH SHA256=${OPENCV_PKG_SHA}  # Use SHA-256 hash
-        DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/opencv/downloads  # Specify a downloads directory
+        URL_HASH SHA256=${OPENCV_PKG_SHA} # Use SHA-256 hash
+        DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/external/opencv/downloads # Specify a downloads directory
         SOURCE_DIR ${OPENCV_DIR}
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-        CONFIGURE_COMMAND ""  # No configure step needed
-        BUILD_COMMAND ""  # No build step needed
-        INSTALL_COMMAND  ""
+        CONFIGURE_COMMAND "" # No configure step needed
+        BUILD_COMMAND "" # No build step needed
+        INSTALL_COMMAND ""
+
         # COMMAND powershell -Command "Expand-Archive -Path '<DOWNLOAD_DIR>/${OPENCV_OS_FILE}.zip' -DestinationPath '${CMAKE_SOURCE_DIR}/external/opencv' -Force"
         BUILD_IN_SOURCE FALSE
-        BUILD_ALWAYS FALSE  # Adjust this according to your needs
-    )  
-    
-elseif(OPENCV_ACTION STREQUAL "use_existing")
-    message(FATAL_ERROR "Option Unimplemented")
-else()
-    message(FATAL_ERROR "Incorrect action option. Valid values are build, doewnload and use_existing")
-endif()
+        BUILD_ALWAYS FALSE # Adjust this according to your needs
+    )
 
 # Specify the opencv library and include directories
 add_library(opencv INTERFACE)

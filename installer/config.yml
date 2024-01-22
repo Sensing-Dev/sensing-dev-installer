@@ -9,6 +9,16 @@ libraries:
     git_repo: "https://github.com/Sensing-Dev/aravis.git"
     version: "0.8.30-internal"
 
+  aravis_dep:
+    name: aravis_dep
+    src_path: aravis_dep
+    install_path: install/aravis_dep
+    action: download # can be 'download', 'build', or 'use_existing'
+    pkg_url: "https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/Aravis-0.8.30-internal-dependencies.zip"
+    pkg_sha: "f1f93b6c8ee2dd881e7c8950b06562159fb55f615d7ae2de165d861194e9b6c3"
+    git_repo: "https://github.com/conan-io/conan-center-index.git" # use recipe here for appropriate version
+    version: "0.8.30-internal"
+
   pygobject:
     name: pygobject
     src_path: pygobject
@@ -33,7 +43,7 @@ libraries:
     name: opencv
     src_path: opencv
     install_path: install/opencv
-    action: download # can be 'download', 'build', or 'use_existing'
+    # action: download # can be 'download', 'build', or 'use_existing'
     pkg_url: "https://github.com/opencv/opencv/releases/download/4.5.5/opencv-4.5.5-vc14_vc15.exe"
     pkg_sha: "cac31973cd1c59bfe9dc926acbde815553d23662ea355e0414b5e50d8f8aa5a8"
     version: "4.5.5"

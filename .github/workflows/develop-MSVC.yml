@@ -50,6 +50,10 @@ jobs:
         working-directory: installer/build
         run: cmake --build . --config Release
 
+      - name: Generate liscence files
+        working-directory: installer/build
+        run: cmake -G "Visual Studio 17 2022" -A x64 ../ 
+
       - name: Package with CPack WIX
         working-directory: installer/build
         run: cpack -G "WIX"
@@ -60,6 +64,18 @@ jobs:
           name: sensing-dev-installer-msi
           path: |
             installer/build/*.msi
+
+      - name: Create package zip
+        working-directory: installer/build
+        run: cpack -G "ZIP"
+
+      - name: Create package without opencv
+        working-directory: installer/build
+        run:  cmake -G "Visual Studio 17 2022" -A x64 ../ -DOPENCV_ACTION="use_existing"
+
+      - name: Create package msi
+        working-directory: installer/build
+        run: cpack -G "WIX"
 
       - name: Create package zip
         working-directory: installer/build
