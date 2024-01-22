@@ -52,7 +52,8 @@ if ( -not $installPath) {
         # If a username is provided, get that user's LOCALAPPDATA path
         $UserProfilePath = "C:\Users\$user"
         $installPath = Join-Path -Path $UserProfilePath -ChildPath "AppData\Local"
-    } else {
+    }
+    else {
         # If no username is provided, use the LOCALAPPDATA of the currently logged-in user
         $installPath = "$env:LOCALAPPDATA"
     }
@@ -60,6 +61,11 @@ if ( -not $installPath) {
 Write-Verbose "installPath = $installPath"
 
 $installerName = "sensing-dev"
+if ($InstallOpenCV) {
+}
+else {
+    $installerName = "${installerName}-no-opencv"
+}
 
 if (-not $Url ) {
     if (-not $version ) {
@@ -68,22 +74,22 @@ if (-not $Url ) {
         $version = $response.tag_name
         Write-Verbose "Latest version: $version" 
     }
-   if ($version -match 'v(\d+\.\d+\.\d+)(-\w+)?') {
+    if ($version -match 'v(\d+\.\d+\.\d+)(-\w+)?') {
         $versionNum = $matches[1] 
         Write-Output "Installing version: $version" 
-   }
-    $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-"
-    if ($InstallOpenCV) {
-        $baseUrl = "${baseUrl}-no-opencv"
     }
-    $zipUrl = "${baseUrl}-win64.zip"
-    $msiUrl = "${baseUrl}-win64.msi"
+    $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-win64"
+    $zipUrl = "${baseUrl}.zip"
+    $msiUrl = "${baseUrl}.msi"
 
     if ($user) {
         $Url = "$zipUrl"
-    } else {
+    }
+    else {
         $Url = "$msiUrl"
     }   
+
+    Write-Host "URL : $Url"
 }
 
 if ($Url.EndsWith("zip")) {
@@ -106,10 +112,10 @@ if ($Url.EndsWith("zip")) {
         Get-ChildItem -Path $tempExtractionPath
         # If extraction is successful, replace the old contents with the new
         $installPath = "$installPath\$installerName"
-        if (Test-Path -Path ${installPath}){
+        if (Test-Path -Path ${installPath}) {
             Get-ChildItem -Path $installPath -Recurse | Remove-Item -Force -Recurse
         }
-        else{
+        else {
             New-Item -Path $installPath -ItemType Directory
         }
         Move-Item -Path "$tempExtractionPath\${installerName}-${versionNum}-win64\*" -Destination $installPath -Force
@@ -122,8 +128,8 @@ if ($Url.EndsWith("zip")) {
         # Optional: Cleanup the temporary extraction directory
         Remove-Item -Path $tempExtractionPath -Force -Recurse
     }    
-     # Optionally delete the ZIP file after extraction
-     Remove-Item -Path $tempZipPath -Force
+    # Optionally delete the ZIP file after extraction
+    Remove-Item -Path $tempZipPath -Force
 }
 elseif ($Url.EndsWith("msi")) {
     $installPath = "$installPath\$installerName"
@@ -132,31 +138,32 @@ elseif ($Url.EndsWith("msi")) {
     $tempMsiPath = "${env:TEMP}\${installerName}.msi"
     Invoke-WebRequest -Uri $Url -OutFile $tempMsiPath -Verbose
 
-    $log="${env:TEMP}\${installerName}__install.log"
+    $log = "${env:TEMP}\${installerName}__install.log"
     Start-Process -Wait -FilePath "msiexec.exe" -ArgumentList "/i ${tempMsiPath} INSTALL_ROOT=${installPath} /qb /l*v ${log}" -Verb RunAs
 
     # Check if the process started and finished successfully
     if ($?) {
         Write-Host "${installerName} installed at ${installPath}. See detailed log here ${log} "
-    } else {
+    }
+    else {
         Write-Error "The ${installerName} installation encountered an error. See detailed log here ${log}"        
     }
-      # Optionally delete the MSI file after extraction
-      Remove-Item -Path $tempMsiPath -Force
+    # Optionally delete the MSI file after extraction
+    Remove-Item -Path $tempMsiPath -Force
 }
 else {
     Write-Error "Invalid Url"
 }
 
-if (Test-Path -Path ${installPath})
-{
+if (Test-Path -Path ${installPath}) {
     $relativeScriptPath = "tools\Env.ps1"
     # Run the .ps1 file from the installed package
     $ps1ScriptPath = Join-Path -Path $installPath -ChildPath $relativeScriptPath
     Write-Verbose "ps1ScriptPath = $ps1ScriptPath"
     if (Test-Path -Path $ps1ScriptPath -PathType Leaf) {
         & $ps1ScriptPath
-    } else {
+    }
+    else {
         Write-Error "Script at $relativeScriptPath not found in the installation path!"
     }
 }
