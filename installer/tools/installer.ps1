@@ -61,10 +61,12 @@ if ( -not $installPath) {
 Write-Verbose "installPath = $installPath"
 
 $installerName = "sensing-dev"
+$installerPostfixName = "-no-opencv"
 if ($InstallOpenCV) {
+    $installerPostfixName = ""
 }
 else {
-    $installerName = "${installerName}-no-opencv"
+    $installerPostfixName = "-no-opencv"
 }
 
 if (-not $Url ) {
@@ -78,7 +80,7 @@ if (-not $Url ) {
         $versionNum = $matches[1] 
         Write-Output "Installing version: $version" 
     }
-    $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}-${versionNum}-win64"
+    $baseUrl = "https://github.com/Sensing-Dev/sensing-dev-installer/releases/download/${version}/${installerName}${installerPostfixName}-${versionNum}-win64"
     $zipUrl = "${baseUrl}.zip"
     $msiUrl = "${baseUrl}.msi"
 
@@ -118,7 +120,7 @@ if ($Url.EndsWith("zip")) {
         else {
             New-Item -Path $installPath -ItemType Directory
         }
-        Move-Item -Path "$tempExtractionPath\${installerName}-${versionNum}-win64\*" -Destination $installPath -Force
+        Move-Item -Path "$tempExtractionPath\${installerName}${installerPostfixName}-${versionNum}-win64\*" -Destination $installPath -Force
         
         # Cleanup the temporary extraction directory
         Remove-Item -Path $tempExtractionPath -Force -Recurse
