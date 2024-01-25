@@ -90,14 +90,14 @@ if (Test-Path $tempExtractionPath) {
 # Run Driver installer
 Write-Verbose "Start Driver installer"
 
-$infPath = "$TempDir/target.inf"
+$infPath = "$TempDir/target_device.inf"
 if (-not (Test-Path -Path $infPath -PathType Leaf) ){
     Write-Error "$infPath does not exist."
 }
 else{
     $pnputilOptions = @{
-        FilePath = "PUNPUTIL"
-        ArgumentList           = "-i -a $infPath"
+        FilePath = "PNPUtil"
+        ArgumentList           = "-i -a ./target_device.inf"
         WorkingDirectory       = "$TempDir"
         Wait                   = $true
         Verb                   = "RunAs"  # This attempts to run the process as an administrator
