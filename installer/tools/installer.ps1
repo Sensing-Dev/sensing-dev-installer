@@ -293,7 +293,7 @@ function Invoke-Script {
     }
     Write-Verbose "installPath = $installPath"
     $installerName = "sensing-dev"
-    $installerPostfixName = if ($InstallOpenCV) { "-no-opencv" } else { "" }
+    $installerPostfixName = if ($InstallOpenCV) { "" } else { "-no-opencv" }
     $script:Url = $Url
     # Construct download URL if not provided
     if (-not $Url -and -not $LocalInstaller) {
