@@ -200,6 +200,7 @@ jobs:
         uses: actions/checkout@v4.1.1
         with:
           submodules: recursive
+          ref: ${{ github.ref }}
 
       - name: Create and enter build directory
         working-directory: installer\testcases\cpp\${{ matrix.tests}}
@@ -253,6 +254,8 @@ jobs:
       steps: 
         - name: Checkout repository
           uses: actions/checkout@v4.1.1  
+          with:
+            ref: ${{ github.ref }}
 
         - name: Setup Python
           uses: actions/setup-python@v4.7.1
