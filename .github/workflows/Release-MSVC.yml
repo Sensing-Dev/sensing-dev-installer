@@ -200,7 +200,13 @@ jobs:
         $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
         Write-Host PATH = $PATH        
         $env:PATH="$env:PATH;$PATH"
-        & arv-tool-0.8.exe
+        & arv-tool-0.8.exe 
+        mkdir build && cd installer/testcases/cpp/aravis_test/build && cmake -G "Visual Studio 17 2022" -A x64 ../
+        ls
+        cmake --build . --config Release 
+        ls
+        
+        
 
     - name: Uninstallation
       working-directory: build
