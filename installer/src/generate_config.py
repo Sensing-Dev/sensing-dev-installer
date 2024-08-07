@@ -19,38 +19,54 @@ def remove_v(version):
         return version[1:]
     else:
         return version
-
+    
+def get_aravis_0_8_30_internal_url(pf):
+    if pf == 'Windows':
+        return 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-win64.zip'
+    elif pf == 'Linux':
+        return 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-x86-64-linux.tar.gz'
+    else:
+        print('Platform', pf, 'is not supported.')
+        sys.exit(1)
+    
+def get_aravis_dep_0_8_30_internal_url(pf):
+    if pf == 'Windows':
+        return 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/Aravis-0.8.30-internal-dependencies.zip'
+    elif pf == 'Linux':
+        return None
+    else:
+        print('Platform', pf, 'is not supported.')
+        sys.exit(1)
+    
 def generate_url(cmp, version, pf):
     updated_ver = version
     url = ''
 
     if cmp == 'aravis':
         url = 'https://github.com/Sensing-Dev/aravis/releases/download/' + version
-        if pf == 'Windows':
-            if version == '0.8.30-internal':
-                url = 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-win64.zip'
-            else:
-                url += '/aravis-' + version + '-win64.zip'
-        elif pf == 'Linux':
-            if version == '0.8.30-internal':
-                url = 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/aravis-internal-0.8.30-x86-64-linux.tar.gz'
-            else:
-                url += '/aravis-' + version + '-x86-64-linux.tar.gz'
+        if version == '0.8.30-internal':
+            url = get_aravis_0_8_30_internal_url(pf)
         else:
-            print('Platform', pf, 'is not supported.')
-            sys.exit(1)
+            if pf == 'Windows':
+                url += '/aravis-' + remove_v(version) + '-x86-64-windows.zip'
+            elif pf == 'Linux':
+                url += '/aravis-' + remove_v(version) + '-x86-64-linux.tar.gz'
+            else:
+                print('Platform', pf, 'is not supported.')
+                sys.exit(1)
     elif cmp =='aravis_dep':
-        url = 'https://github.com/Sensing-Dev/aravis/releases/download/' + version
-        if pf == 'Windows':
-            if version == '0.8.30-internal':
-                url = 'https://github.com/Sensing-Dev/aravis/releases/download/internal-0.8.30/Aravis-0.8.30-internal-dependencies.zip'
-            else:
-                url += '/Aravis-' + version + '-dependencies.zip'
-        elif pf == 'Linux':
+        if pf == 'Linux':
             return None, updated_ver
+        url = 'https://github.com/Sensing-Dev/aravis/releases/download/' + version
+
+        if version == '0.8.30-internal':
+            url = get_aravis_dep_0_8_30_internal_url(pf)
         else:
-            print('Platform', pf, 'is not supported.')
-            sys.exit(1)
+            if pf == 'Windows':
+                url += '/aravis-' + remove_v(version) + '-dependencies.zip'
+            else:
+                print('Platform', pf, 'is not supported.')
+                sys.exit(1)
     elif cmp == 'ion_kit':
         url = 'https://github.com/fixstars/ion-kit/releases/download/' + version
         if pf == 'Windows':

@@ -1,15 +1,15 @@
 libraries:
   aravis:
     name: aravis
-    pkg_sha: "1f0ef68a9d33f9bb0c53361131bf73d67ffd3ebb4140758d914489884da93b97"
+    pkg_sha: "8f4fff574eb0ec809882977d679baea101a7fb59b68411435b245ae3d7b6dc54"
     git_repo: "https://github.com/Sensing-Dev/aravis.git"
-    version: "0.8.30-internal"
+    version: "v0.8.31"
 
   aravis_dep:
     name: aravis_dep
-    pkg_sha: "79a3a94c56d65fc63312cbb258f48be542993543fb74a33aaa8ab7ebc5c76354"
+    pkg_sha: "2b68d3d61da13aaf3af9897f2b205c2a93ebe3ff49dc757a95265bb656cd2d97"
     git_repo: "" # use recipe here for appropriate version
-    version: "0.8.30-internal"
+    version: "v0.8.31"
 
   pygobject:
     name: pygobject
