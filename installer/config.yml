@@ -1,7 +1,7 @@
 libraries:
   aravis:
     name: aravis
-    pkg_sha: "8f4fff574eb0ec809882977d679baea101a7fb59b68411435b245ae3d7b6dc54"
+    pkg_sha: "d593e1d3af223957d384288166f0cee0f5f3648f07a2b52e7149816c03cd2ebe"
     git_repo: "https://github.com/Sensing-Dev/aravis.git"
     version: "v0.8.31"
 
