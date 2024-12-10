@@ -29,8 +29,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       LATEST_RELEASED_SDK: ${{ steps.get_latest_tag.outputs.LATEST_RELEASED_SDK }}
-      LATEST_OPENCV_VERSION: ${{ steps.set-vars.outputs.LATEST_OPENCV_VERSION }}
-      LATEST_OPENCV_BIN_PATH: ${{ steps.set-vars.outputs.LATEST_OPENCV_BIN_PATH }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -39,12 +37,11 @@ jobs:
         run: |
           latest_tag=$(curl -s https://api.github.com/repos/${{ env.REPO_NAME}}/releases/latest | jq -r .tag_name)
           echo "LATEST_RELEASED_SDK=${latest_tag}" >> $GITHUB_OUTPUT
-      - name: Set environment variables 
-        id: set-vars
-        run: |
-          echo "LATEST_OPENCV_VERSION=${{ env.LATEST_OPENCV_VERSION}}" >> $GITHUB_OUTPUT
-          echo "LATEST_OPENCV_BIN_PATH=${{ env.LATEST_OPENCV_BIN_PATH}}" >> $GITHUB_OUTPUT
 
+
+
+
+        
   generate_config:
     runs-on: ubuntu-22.04
 
@@ -83,6 +80,13 @@ jobs:
           os: [ubuntu-22.04]
           install_option : ["--version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}", "--config-path config_Linux.json"]
           with_openCV : ["", "--install-opencv"]
+          with_gst_option:  ["", "--install-gst-tools", "--install-gst-tools --install-gst-plugin"]
+          exclude:
+            # InstallGstTools is not on the release version yet
+            - install_option: "-version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}"
+              with_gst_option: "--install-gst-tools"
+            - install_option: "-version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}"
+              with_gst_option: "--install-gst-tools --install-gst-plugin"
 
     steps:
       - name: Download All Artifacts
@@ -101,9 +105,9 @@ jobs:
         run: |
           cd ${{ github.workspace }}/test
           chmod +x setup.sh
-          sudo bash setup.sh ${{ matrix.install_option }} ${{ matrix.with_openCV }} --verbose
+          sudo bash setup.sh ${{ matrix.install_option }} ${{ matrix.with_openCV }} ${{ matrix.with_gst_option }} --verbose
 
-      - name: Check if version_info.json exists
+      - name: Check if version_info.json exists (v24.05 or later)
         id: check_version_info
         uses: andstor/file-existence-action@v3
         with:
@@ -115,7 +119,7 @@ jobs:
         with:
           python-version: "3.11.4"
 
-      - name: Test Aravis installation and Path
+      - name: Test Aravis installation and Path (v24.01 or later)
         run: |
           export LD_LIBRARY_PATH=/opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           cd ${{ github.workspace }}/download/installer/testcases/cpp/aravis_test
@@ -124,7 +128,7 @@ jobs:
           eval "$python_output"
           ./aravis_test
 
-      - name: Test ion-kit
+      - name: Test ion-kit (v24.01 or later)
         run: |
           export LD_LIBRARY_PATH=/opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           cd ${{ github.workspace }}/download/installer/testcases/cpp/ionkit_test
@@ -133,7 +137,7 @@ jobs:
           eval "$python_output"
           ./ionkit_test
 
-      - name: Test opencv
+      - name: Test opencv (v24.01 or later)
         if: ${{ (matrix.with_openCV == '--install-opencv') }}
         run: |
           export LD_LIBRARY_PATH=/opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
@@ -143,37 +147,37 @@ jobs:
           eval "$python_output"
           ./opencv_test
 
-      - name: Install modules for gstreamer test
-        run: |
-          sudo apt-get update
-          sudo apt-get install libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio -y
-
-      - name: Test gst-inspect-1.0 (-InstallGstTools)
+      - name: Test gst-inspect-1.0 (v24.12 or later)
+        if: ${{ matrix.with_gst_option == '--install-gst-tools' ||  matrix.with_gst_option == '--install-gst-tools --install-gst-plugin'}}
         run: |
           gst-inspect-1.0
-
-      - name: Test gst-inspect-1.0 queue (-InstallGstTools and -InstallGstPlugins)
-        run: |
+          echo "==="
           gst-inspect-1.0 queue
   
-      - name: Test gst-inspect-1.0 videoconvert (-InstallGstTools and -InstallGstPlugins)
+      - name: Test gst-plugin-base (v24.12 or later)
+        if: ${{ matrix.with_gst_option == '--install-gst-tools --install-gst-plugin' }}
         run: |
           gst-inspect-1.0 videoconvert
 
-      - name: Test gst-inspect-1.0 multifilesrc (-InstallGstTools and -InstallGstPlugins for Good)
+      - name: Test gst-plugin-good (v24.12 or later)
+        if: ${{ matrix.with_gst_option == '--install-gst-tools --install-gst-plugin' }}
         run: |
           gst-inspect-1.0 multifilesrc
 
-      - name: Test gst-inspect-1.0 aravissrc (-InstallGstTools)
+      - name: Test gst-inspect-1.0 aravissrc (v24.12 or later)
+        if: ${{ matrix.with_gst_option == '--install-gst-tools --install-gst-plugin' }}
         run: |
           export GST_PLUGIN_PATH=/opt/sensing-dev/lib/x86_64-linux-gnu/gstreamer-1.0/:$GST_PLUGIN_PATH
           export LD_LIBRARY_PATH=/opt/sensing-dev/lib:/opt/sensing-dev/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
           gst-inspect-1.0 aravissrc
 
-      - name: Test gst-inspect-1.0 gendcseparator (-InstallGstTools)
+      - name: Test gst-inspect-1.0 gendcseparator (v24.12 or later)
+        if: ${{ matrix.with_gst_option == '--install-gst-tools --install-gst-plugin' }}
         run: |
           export GST_PLUGIN_PATH=/opt/sensing-dev/lib/x86_64-linux-gnu/gstreamer-1.0/:$GST_PLUGIN_PATH
           gst-inspect-1.0 gendcseparator
+
+
 
           
 

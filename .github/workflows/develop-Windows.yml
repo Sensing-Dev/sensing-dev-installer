@@ -35,11 +35,7 @@ jobs:
     runs-on: windows-latest
     outputs:
       LATEST_RELEASED_SDK: ${{ steps.get_latest_tag.outputs.LATEST_RELEASED_SDK }}
-      LATEST_OPENCV_VERSION: ${{ steps.set-vars.outputs.LATEST_OPENCV_VERSION }}
-      LATEST_OPENCV_BIN_PATH: ${{ steps.set-vars.outputs.LATEST_OPENCV_BIN_PATH }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
       - name: Get latest release tag
         id: get_latest_tag
         run: |
@@ -47,11 +43,8 @@ jobs:
           $latestTag = $releases.tag_name
           echo "LATEST_RELEASED_SDK=$latestTag" >> $env:GITHUB_OUTPUT
 
-      - name: Set environment variables 
-        id: set-vars
-        run: |
-          echo "LATEST_OPENCV_VERSION=${{ env.LATEST_OPENCV_VERSION}}" >> $env:GITHUB_OUTPUT
-          echo "LATEST_OPENCV_BIN_PATH=${{ env.LATEST_OPENCV_BIN_PATH}}" >> $env:GITHUB_OUTPUT
+
+
 
 
   generate_config:
@@ -83,6 +76,10 @@ jobs:
             ${{ github.workspace }}/installer/tools/*
             ${{ github.workspace }}/installer/testcases
 
+
+
+
+
   test_installation:
     runs-on: ${{ matrix.os }}
     needs: [set_env, generate_config]
@@ -113,22 +110,12 @@ jobs:
           Move-Item -Path ${{ github.workspace }}/download/build/config_Windows.json -Destination ${{ github.workspace }}/test
           Move-Item -Path ${{ github.workspace }}/download/installer/tools/installer.ps1 -Destination ${{ github.workspace }}/test
 
-      - name: Install with the script from Artifacts (general)
-        if: ${{ matrix.os != 'windows-latest' || matrix.with_openCV != '-InstallOpenCV' || matrix.install_option != format('-version {0}', needs.set_env.outputs.LATEST_RELEASED_SDK) }}
+      - name: Install with the script from Artifacts (v24.09 or later)
         run: |
           cd ${{ github.workspace }}/test
           powershell.exe -ExecutionPolicy Bypass -File .\installer.ps1 ${{ matrix.install_option }} ${{ matrix.with_openCV }} ${{ matrix.with_gst_option }} -verbose
 
-      - name: Install with the script from Artifacts (with the latest MSVC with Sensing-Dev v24.05 or earlier)
-        if: ${{ matrix.os == 'windows-latest' && matrix.with_openCV == '-InstallOpenCV' && matrix.install_option == format('-version {0}', needs.set_env.outputs.LATEST_RELEASED_SDK) }}
-        run: |
-          cd ${{ github.workspace }}/test
-          powershell.exe -ExecutionPolicy Bypass -File .\installer.ps1 ${{ matrix.install_option }} ${{ matrix.with_gst_option }} -verbose
-          $targetDir= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          Invoke-WebRequest -Uri https://github.com/opencv/opencv/releases/download/${{ needs.set_env.outputs.LATEST_OPENCV_VERSION }}/opencv-${{ needs.set_env.outputs.LATEST_OPENCV_VERSION }}-windows.exe -OutFile opencv-${{ needs.set_env.outputs.LATEST_OPENCV_VERSION }}-windows.exe 
-          Start-Process -FilePath opencv-${{ needs.set_env.outputs.LATEST_OPENCV_VERSION }}-windows.exe -ArgumentList "-o`"$targetDir`" -y" -Wait
-
-      - name: Check if OpenCV exists on Windows
+      - name: Check if OpenCV exists on Windows (v24.09 or later)
         if: ${{ (matrix.with_openCV == '-InstallOpenCV') }}
         id: check_opencv
         run: |
@@ -140,7 +127,7 @@ jobs:
             exit 1
           }
 
-      - name: Check if version_info.json exists
+      - name: Check if version_info.json exists (v24.05 or later)
         run: |
           $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
           $target_file = Join-Path -Path "$SENSING_DEV_ROOT" -ChildPath "version_info.json"
@@ -151,20 +138,7 @@ jobs:
             exit 1
           }
 
-      - name: Check if arv.h exists
-        run: |
-          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          $include_dir = Join-Path -Path "$SENSING_DEV_ROOT" -ChildPath "include"
-          $arv_inc_dir = Join-Path -Path "$include_dir" -ChildPath "aravis-0.8"
-          $target_file = Join-Path -Path "$arv_inc_dir" -ChildPath "arv.h"
-          if (Test-Path $target_file){
-            echo "arv.h exists."
-          } else{
-            echo "arv.h does not exist."
-            exit 1
-          }
-
-      - name: Test Aravis installation and Path
+      - name: Test Aravis installation and Path (v24.01 or later)
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
           $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User") 
@@ -174,7 +148,7 @@ jobs:
           cmake --build . --config Release 
           cd Release && ls && ./aravis_test
 
-      - name: Test ion-kit
+      - name: Test ion-kit (v24.01 or later)
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
           $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")    
@@ -184,8 +158,8 @@ jobs:
           cmake --build . --config Release 
           cd Release && ls && ./ionkit_test
 
-      - name: Test opencv (general)
-        if: ${{ matrix.with_openCV == '-InstallOpenCV' && (matrix.os != 'windows-latest' || matrix.install_option != format('-version {0}', needs.set_env.outputs.LATEST_RELEASED_SDK)) }}
+      - name: Test opencv (v24.09 or later)
+        if: ${{ matrix.with_openCV == '-InstallOpenCV' }}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
           $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
@@ -195,20 +169,7 @@ jobs:
           cmake --build . --config Release 
           cd Release && ./opencv_test
 
-      - name: Test opencv (with the latest MSVC with OpenCV)
-        if: ${{ matrix.with_openCV == '-InstallOpenCV' && (matrix.os == 'windows-latest' && matrix.install_option == format('-version {0}', needs.set_env.outputs.LATEST_RELEASED_SDK)) }}
-        run: |
-          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
-          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT} 
-          $env:PATH="$env:PATH;$PATH"
-          $OpenCVBin = Join-Path -Path $SENSING_DEV_ROOT -ChildPath ${{ needs.set_env.outputs.LATEST_OPENCV_BIN_PATH }} 
-          $env:PATH="$env:PATH;$OpenCVBin"
-          cd ${{ github.workspace }}/download/installer/testcases/cpp/opencv_test  && cmake ./
-          cmake --build . --config Release 
-          cd Release && ./opencv_test
-
-      - name: Test gst-inspect-1.0 (-InstallGstTools)
+      - name: Test gst-inspect-1.0 and gstreamer (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools' ||  matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins'}}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -216,7 +177,7 @@ jobs:
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0
 
-      - name: Test gst-inspect-1.0 queue (-InstallGstTools and -InstallGstPlugins)
+      - name: Test gstreamer core with plugin (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins' }}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -224,7 +185,7 @@ jobs:
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0 queue
 
-      - name: Test gst-inspect-1.0 videoconvert (-InstallGstTools and -InstallGstPlugins for Base)
+      - name: Test gst-plugin-base (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins' }}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -232,7 +193,7 @@ jobs:
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0 videoconvert
 
-      - name: Test gst-inspect-1.0 multifilesrc (-InstallGstTools and -InstallGstPlugins for Good)
+      - name: Test gst-plugin-good (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins' }}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -240,7 +201,7 @@ jobs:
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0 multifilesrc
 
-      - name: Test gst-inspect-1.0 aravissrc (-InstallGstTools)
+      - name: Test gst-inspect-1.0 aravissrc (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools' ||  matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins'}}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
@@ -248,13 +209,17 @@ jobs:
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0 aravissrc
 
-      - name: Test gst-inspect-1.0 gendcseparator (-InstallGstTools)
+      - name: Test gst-inspect-1.0 gendcseparator (v24.12 or later)
         if: ${{ matrix.with_gst_option == '-InstallGstTools' ||  matrix.with_gst_option == '-InstallGstTools -InstallGstPlugins'}}
         run: |
           $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
           $env:PATH="$env:PATH;$PATH"
           $env:GST_PLUGIN_PATH=[Environment]::GetEnvironmentVariable("GST_PLUGIN_PATH", "User")
           gst-inspect-1.0 gendcseparator
+
+
+
+
 
   test_python:
     runs-on: ${{ matrix.os }}
@@ -338,7 +303,6 @@ jobs:
     strategy:
       matrix:
         install_option : ["-version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}", "-configPath config_Windows.json"]
-        with_openCV : ["", "-InstallOpenCV"]
         os: [windows-latest]
         python_version: ["3.10", "3.11"]
         overwrite_opencv: [true, false]
@@ -364,7 +328,7 @@ jobs:
       - name: Install Sensing-Dev with the script from Artifacts (general)
         run: |
           cd ${{ github.workspace }}/test
-          powershell.exe -ExecutionPolicy Bypass -File .\installer.ps1 ${{ matrix.install_option }} ${{ matrix.with_openCV }} -verbose
+          powershell.exe -ExecutionPolicy Bypass -File .\installer.ps1 ${{ matrix.install_option }} -verbose
 
       - name: Install Numpy
         run: | 
