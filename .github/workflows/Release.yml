@@ -150,7 +150,7 @@ jobs:
           ./opencv_test
 
       - name: Test GenDC Header Library (v25.01 or later)
-        if: ${{ matrix.version != format('--version {0}', env.SENSING_DEV_V24_05) }}
+        if: ${{ matrix.version != format('-version {0}', env.SENSING_DEV_V24_05) }}
         run: |
           cd ${{ github.workspace }}/download/installer/testcases/cpp/gendc_test
           python_output=$(python ${{ github.workspace }}/download/installer/testcases/cpp/get_compile_command.py gendc_test.cpp)
