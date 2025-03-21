@@ -36,6 +36,7 @@ declare -A ion_kit_config=( # Declare an associative array with default values
     ["v24.05.09"]="v1.8.7"
     ["v24.05.10"]="v1.8.8"
     ["v24.05.11"]="v1.8.9"
+    ["v24.05.12"]="v1.8.10"
 )
 
 unset gendc_separator_config
@@ -48,6 +49,7 @@ declare -A gendc_separator_config=( # Declare an associative array with default 
     ["v24.05.09"]="v0.2.8"
     ["v24.05.10"]="v0.2.8"
     ["v24.05.11"]="v0.2.8"
+    ["v24.05.12"]="v0.2.8"
 )
 
 unset aravis_config
@@ -60,6 +62,7 @@ declare -A aravis_config=( # Declare an associative array with default values
     ["v24.05.09"]="0.8.30-internal"
     ["v24.05.10"]="0.8.30-internal"
     ["v24.05.11"]="v0.8.30-internal.1"
+    ["v24.05.12"]="v0.8.30-internal.1"
 )
 
 unset aravis_url
