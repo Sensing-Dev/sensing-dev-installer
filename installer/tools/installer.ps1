@@ -242,7 +242,7 @@ function Check-SDKVersion-Valid(){
     [string]$sdkversion
   )
   try {
-    $response = Invoke-WebRequest -Uri "https://github.com/$repositoryName/releases/tag/$sdkversion" -ErrorAction Stop 
+    $response = Invoke-WebRequest -Uri "https://github.com/$repositoryName/releases/tag/$sdkversion" -UseBasicParsing -ErrorAction Stop
     if ($response.StatusCode -ne 200){
       Write-Error "Version $sdkversion does not exist"
       exit 1

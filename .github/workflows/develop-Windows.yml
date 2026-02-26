@@ -70,7 +70,7 @@ jobs:
 
     strategy:
         matrix:
-          os: [windows-2019, windows-latest]
+          os: [windows-latest]
           install_option : ["-version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}", "-configPath config_Windows.json"]
           with_openCV : ["", "-InstallOpenCV"]
           with_gst_option:  ["", "-InstallGstTools", "-InstallGstTools -InstallGstPlugins"]
@@ -231,11 +231,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python_version }}
-
-      - name: Setup winget
-        uses: Cyberboss/install-winget@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
