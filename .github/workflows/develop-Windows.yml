@@ -232,11 +232,6 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Setup winget
-        uses: Cyberboss/install-winget@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
