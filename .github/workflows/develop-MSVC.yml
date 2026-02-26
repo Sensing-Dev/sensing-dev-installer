@@ -93,7 +93,7 @@ jobs:
       id-token: write
     strategy:
         matrix:
-          os: [windows-2019, windows-2022]
+          os: [windows-2022]
     needs: build
     steps:
       - name: Checkout repository
@@ -134,17 +134,6 @@ jobs:
           cd Release && ./ionkit_test
           echo "ion-kit test passed"
   
-      - name: Test opencv for MSVC 2019
-        if: matrix.os == 'windows-2019'
-        run: |
-          $BINPATH="${HOME}/sensing-dev/bin"
-          $OPENCVBIN="${HOME}/sensing-dev/opencv/build/x64/vc15/bin"
-          $env:PATH="$env:PATH;$BINPATH"
-          $env:PATH="$env:PATH;$OPENCVBIN"
-          $env:SENSING_DEV_ROOT="${HOME}/sensing-dev"
-          cd installer/testcases/cpp/opencv_test  && cmake ./
-          cmake --build . --config Release 
-          cd Release && ./opencv_test
 
       - name: Install OpenCV separately on Windows MSVC 2022
         if: matrix.os == 'windows-2022'
@@ -165,3 +154,4 @@ jobs:
           cd installer/testcases/cpp/opencv_test  && cmake ./
           cmake --build . --config Release 
           cd Release && ./opencv_test
+
