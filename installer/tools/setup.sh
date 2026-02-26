@@ -37,6 +37,7 @@ declare -A ion_kit_config=( # Declare an associative array with default values
     ["v24.05.10"]="v1.8.8"
     ["v24.05.11"]="v1.8.9"
     ["v24.05.12"]="v1.8.10"
+    ["v24.05.13"]="v1.8.11"
 )
 
 unset gendc_separator_config
