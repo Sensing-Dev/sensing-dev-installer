@@ -18,9 +18,12 @@ name: Generate Windows Config and test installation with script
 # TODO: after separate C++ and Python installation of Aravis, setup test
 
 on:
+  push:
+    branches-ignore:
+      - main  # This will run the build and test jobs for every push on all branches except for dev to main
+
   pull_request:
-    branches:
-      - main
+      branches: [ release/v24.09 ]
 
 ### modify here for update #####################################################
 env:
