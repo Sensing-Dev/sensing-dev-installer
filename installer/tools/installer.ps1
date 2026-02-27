@@ -112,7 +112,7 @@ function CheckSDKVersion(){
 
   try {
     # Write-Host "https://github.com/$repositoryName/releases/$sdkversion"
-    $response = Invoke-WebRequest -Uri "https://github.com/$repositoryName/releases/tag/$sdkversion" -ErrorAction Stop 
+    $response = Invoke-WebRequest -Uri "https://github.com/$repositoryName/releases/tag/$sdkversion" -UseBasicParsing -ErrorAction Stop
     
     if ($response.StatusCode -ne 200){
       Write-Error "Version $sdkversion does not exist"

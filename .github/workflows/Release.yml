@@ -116,7 +116,7 @@ jobs:
 
     strategy:
         matrix:
-          os: [windows-2019, windows-latest]
+          os: [windows-latest]
           version : ["-version ${{ needs.set_env.outputs.ref_name }}", "-version v24.05.08", "-version v24.01.04", ""]
           with_openCV : ["", "-InstallOpenCV"]
           exclude:
@@ -173,15 +173,3 @@ jobs:
           cd ${{ github.workspace }}/download/installer/testcases/cpp/ionkit_test && cmake ./
           cmake --build . --config Release 
           cd Release && ls && ./ionkit_test
-
-      - name: Test opencv (general)
-        if: ${{ (matrix.os == 'windows-2019') && (matrix.with_openCV == '-InstallOpenCV')}}
-        run: |
-          $sensingdevShortVersion = '${{ matrix.version }}' -replace "-version ", ""
-          $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
-          $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-          $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT} 
-          $env:PATH="$env:PATH;$PATH"
-          cd ${{ github.workspace }}/download/installer/testcases/cpp/opencv_test && cmake ./ -DSDK_VERSION="$sensingdevShortVersion"
-          cmake --build . --config Release 
-          cd Release && ls && ./opencv_test
