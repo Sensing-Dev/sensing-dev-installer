@@ -64,7 +64,7 @@ declare -A aravis_config=( # Declare an associative array with default values
     ["v24.05.09"]="0.8.30-internal"
     ["v24.05.10"]="0.8.30-internal"
     ["v24.05.11"]="v0.8.30-internal.1"
-    ["v24.05.13"]="v0.8.30-internal.1"
+    ["v24.05.12"]="v0.8.30-internal.1"
     ["v24.05.13"]="v0.8.30-internal.1"
 )
 
