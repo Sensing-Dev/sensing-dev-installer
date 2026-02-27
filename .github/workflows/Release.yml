@@ -179,7 +179,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, windows-2022]
+        os: [windows-2022]
         options: [ "-user $env:USERNAME -InstallOpenCV", "-user $env:USERNAME"] 
         version: ['current']
         exclude:
@@ -309,18 +309,6 @@ jobs:
         cmake --build . --config Release 
         cd Release && ls && ./ionkit_test
         echo "ion-kit test passed"
-
-    - name: Test opencv
-      if:  matrix.options == '-user $env:USERNAME -InstallOpenCV' && matrix.os == 'windows-2019'
-      run: |
-        $PATH =  [Environment]::GetEnvironmentVariable("PATH", "User")
-        $SENSING_DEV_ROOT= [Environment]::GetEnvironmentVariable("SENSING_DEV_ROOT", "User")
-        $env:SENSING_DEV_ROOT=${SENSING_DEV_ROOT} 
-        $env:PATH="$env:PATH;$PATH"
-        cd installer/testcases/cpp/opencv_test  && cmake ./
-        cmake --build . --config Release 
-        cd Release && ./opencv_test
-        echo "opencv test passed"
 
     - name: Check if version_info.json exists
       run: |
