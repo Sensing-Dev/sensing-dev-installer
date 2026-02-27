@@ -190,7 +190,7 @@ jobs:
           sudo apt install -y libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
           pip install aravis-python
           pip3 install pycairo
-          pip3 install PyGObject
+          pip3 install PyGObject==3.48.2
 
       - name: Test Aravis
         run: |
