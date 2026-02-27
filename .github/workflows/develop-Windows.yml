@@ -18,9 +18,12 @@ name: Generate Windows Config and test installation with script
 # TODO: after separate C++ and Python installation of Aravis, setup test
 
 on:
+  push:
+    branches-ignore:
+      - main  # This will run the build and test jobs for every push on all branches except for dev to main
+
   pull_request:
-    branches:
-      - main
+      branches: [ release/v24.09 ]
 
 ### modify here for update #####################################################
 env:
@@ -89,7 +92,7 @@ jobs:
 
     strategy:
         matrix:
-          os: [windows-2019, windows-latest]
+          os: [windows-latest]
           install_option : ["-version ${{ needs.set_env.outputs.LATEST_RELEASED_SDK }}", "-configPath config_Windows.json"]
           with_openCV : ["", "-InstallOpenCV"]
           # exclude:
@@ -223,11 +226,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python_version }}
-
-      - name: Setup winget
-        uses: Cyberboss/install-winget@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4

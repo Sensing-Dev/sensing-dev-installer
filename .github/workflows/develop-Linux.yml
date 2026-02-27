@@ -14,9 +14,12 @@ name: Generate Linux Config and test installation with script
 # TODO: after separate C++ and Python installation of Aravis, setup test
 
 on:
+  push:
+    branches-ignore:
+      - main  # This will run the build and test jobs for every push on all branches except for dev to main
+
   pull_request:
-    branches:
-      - main
+      branches: [ release/v24.09 ]
 
 ### modify here for update #####################################################
 env: 
@@ -187,7 +190,7 @@ jobs:
           sudo apt install -y libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
           pip install aravis-python
           pip3 install pycairo
-          pip3 install PyGObject
+          pip3 install PyGObject==3.48.2
 
       - name: Test Aravis
         run: |
